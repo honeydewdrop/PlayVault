@@ -1,0 +1,26 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}My Website{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <!-- Common header content -->
+    </header>
+    
+    <nav>
+        <!-- Navigation links -->
+    </nav>
+    
+    <main>
+        {% block content %}
+        <!-- Default content goes here -->
+        {% endblock %}
+    </main>
+    
+    <footer>
+        <!-- Common footer content -->
+    </footer>
+</body>
+</html>
