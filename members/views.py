@@ -1,42 +1,41 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
+from django.contrib.auth import login as auth_login, authenticate
+from .forms import LoginForm, RegisterForm
 
-def login_user(request):
-    return render(request, 'authenticate/login.html', {})
-def register_user(request):
-    return render(request, 'authenticate/register.html', {})
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                auth_login(request, user)
+                messages.success(request, f"Welcome back, {username}!")
+                return redirect('home')
+            else:
+                messages.error(request, 'Invalid username or password')
+    else:
+        form = LoginForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+def sign_up(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f"Account created for {username}!")
+            return redirect('login')  # Redirect to the login page after successful registration
+    else:
+        form = RegisterForm()
+    return render(request, 'registration/register.html', {'form': form})
+
 def home(request):
-    return render(request, 'home.html', {})
-
-# Create your views here.
-
-def register(request):
-    if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
-        confirm_password = request.POST['confirmpassword']
-
-        if password == confirm_password:
-            user = User.objects.create_user(username=username, password=password)
-            user.save()
-
-            # Log the user in after registration
-            login(request, user)
-
-            return redirect('home')  # Redirect to the home page or another page
-        else:
-            return render(request, 'register.html', {'error': 'Passwords do not match'})
-    
-    return render(request, 'register.html')
-
-def home(request):
-    # Example data to pass to the template
     context = {
         'greeting': 'Welcome to the Home Page!',
         'user_count': 42,  # Example static data
-        # You can also pass dynamic data, e.g., from a database
     }
     return render(request, 'home.html', context)

@@ -3,7 +3,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 
 def home(request):
-    return render(request, 'home.html')
+    context = {
+        'greeting': 'Welcome to the Home Page!',
+        'user_count': 42,  # Example static data
+    }
+    return render(request, 'home.html', context)
 
 def login_view(request):
     if request.method == "POST":

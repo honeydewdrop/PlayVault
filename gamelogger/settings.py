@@ -55,11 +55,12 @@ ROOT_URLCONF = 'gamelogger.urls'
 # settings.py
 import os
 
+# settings.py
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Add global template directories if used
-        'APP_DIRS': True,  # Ensure app directories are checked for templates
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -72,7 +73,11 @@ TEMPLATES = [
 ]
 
 
+
 WSGI_APPLICATION = 'gamelogger.wsgi.application'
+
+# settings.py
+LOGIN_REDIRECT_URL = '/'  # Replace with the URL or URL name of your homepage
 
 
 # Database

@@ -1,3 +1,4 @@
+{% extends "navbar.html" %}
 <!-- base.html -->
 <!DOCTYPE html>
 <html>
@@ -10,18 +11,20 @@
     </header>
     
     <nav>
-        <!-- Navigation links -->
+
     </nav>
     
     <main>
         {% block content %}
     <h1>Welcome to the Home Page!</h1>
+    {% if user.is_authenticated %}
+        <p>Hello, {{ user.username }}!</p>
     <p>This is the content specific to the home page.</p>
-{% endblock %}
+    {% endblock %}
     </main>
     
     <footer>
-        <!-- Common footer content -->
+        <p>Created in 2024</p>>
     </footer>
 </body>
 </html>
