@@ -15,11 +15,8 @@
     </nav>
     
     <main>
-        {% block content %}
-    <h1>Welcome to the Home Page!</h1>
-    {% if user.is_authenticated %}
-        <p>Hello, {{ user.username }}!</p>
-    <p>This is the content specific to the home page.</p>
+    {% block content %}
+        <h1>Welcome to the Home Page!</h1>
     {% endblock %}
     </main>
     

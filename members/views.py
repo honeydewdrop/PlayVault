@@ -1,7 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, authenticate
+from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
+
+def logout_view(request):
+    if request.method == 'POST':
+        logout(request)
+        return redirect('home')  # Redirect to the home page or another page
+    return redirect('home')  # Redirect to the home page or another page if GET
 
 def login_view(request):
     if request.method == 'POST':
