@@ -1,10 +1,24 @@
 {% extends "navbar.html" %}
+{% load static %}
 
 {% block content %}
-    <h1>{{ greeting }}</h1>
-    <p>Track, review, and analyze your favorite games.</p>
-    {% if user.is_authenticated %}
-        <p>Hello, {{ user.username }}!</p>
-    {% endif %}
-    <!-- <p>We have {{ user_count }} users registered.</p> -->
+<style>
+    h1 {
+      color: black;
+      font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+      font-size: 300%;
+    }
+    p {
+      color: red;
+      font-family: courier;
+      font-size: 160%;
+    }
+</style>
+<h1>{{ greeting }}</h1>
+<p>Track, review, and analyze your favorite games.</p>
+{% if user.is_authenticated %}
+    <p>Hello, {{ user.username }}!</p>
+{% endif %}
+<img src="{% static 'assets/gamebg.jpg' %}" alt="Description of the image" width="1200" height="600">
+<!-- <p>We have {{ user_count }} users registered.</p> -->
 {% endblock %}
