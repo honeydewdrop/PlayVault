@@ -1,24 +1,53 @@
-{% extends "navbar.html" %}
+{% extends "base.html" %}
+
 {% load static %}
 
 {% block content %}
+
 <style>
     h1 {
-      color: black;
+      color: white;
       font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
       font-size: 300%;
+      margin-top: 300px;
     }
     p {
-      color: red;
+      color: white;
       font-family: courier;
       font-size: 160%;
+      margin-top: 20px;
+    }
+ 
+    body {
+        margin: 0;
+        height: 100vh;
+        background: 
+            linear-gradient(to bottom, transparent 40%, #000000 50%),
+            url("{% static 'assets/gamebg.jpg' %}");
+        background-size: cover, cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100%;
+        color: white;
+        font-family: Arial, sans-serif;
     }
 </style>
-<h1>{{ greeting }}</h1>
-<p>Track, review, and analyze your favorite games.</p>
-{% if user.is_authenticated %}
-    <p>Hello, {{ user.username }}!</p>
-{% endif %}
-<img src="{% static 'assets/gamebg.jpg' %}" alt="Description of the image" width="1200" height="600">
-<!-- <p>We have {{ user_count }} users registered.</p> -->
+
+<div class="center-content">
+    <div>
+        <h1>{{ greeting }}</h1>
+        <p>Track, review, and analyze your favorite games.</p>
+        {% if user.is_authenticated %}
+            <p>Hello, {{ user.username }}!</p>
+        {% endif %}
+    </div>
+</div>
+
 {% endblock %}

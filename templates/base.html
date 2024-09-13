@@ -7,7 +7,7 @@
 </head>
 <body>
     <header>
-        <!-- Common header content -->
+       <h1>Welcome to GameLogger!</h1>
     </header>
     
     <nav>
@@ -15,9 +15,10 @@
     </nav>
     
     <main>
-    {% block content %}
-        <h1>Welcome to the Home Page!</h1>
-    {% endblock %}
+        {% block content %}
+        <!-- Default content (e.g., for 404 pages or unmodified templates) -->
+        <h1>Welcome to GameLogger!</h1> 
+        {% endblock %}
     </main>
     
     <footer>
