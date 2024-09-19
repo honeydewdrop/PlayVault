@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
+from django.contrib.auth.decorators import login_required
 
 def logout_view(request):
     if request.method == 'POST':
@@ -46,3 +47,9 @@ def home(request):
         'user_count': 42,  # Example static data
     }
     return render(request, 'home.html', context)
+
+@login_required
+def profile_view(request):
+    # You can pass user-specific data to the profile page
+    user = request.user
+    return render(request, 'profile.html', {'user': user})

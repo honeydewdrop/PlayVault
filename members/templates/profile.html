@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Welcome, {{ user.username }}!</h1>
+
+    <p><strong>Email:</strong> {{ user.email }}</p>
+
+    <h2>Your Profile</h2>
+    <ul>
+        <li><strong>Username:</strong> {{ user.username }}</li>
+        <li><strong>Email:</strong> {{ user.email }}</li>
+        <li><strong>Date Joined:</strong> {{ user.date_joined }}</li>
+    </ul>
+
+    <h3>Update Profile</h3>
+    <!-- Add links to update profile, change password, etc. -->
+    <a href="{% url 'password_change' %}">Change Password</a><br>
+    <a href="{% url 'logout' %}">Log Out</a>
+{% endblock %}
