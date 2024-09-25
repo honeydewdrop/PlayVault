@@ -4,6 +4,7 @@ from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
+from .utils import fetch_igdb_games
 
 def logout_view(request):
     if request.method == 'POST':
@@ -47,6 +48,10 @@ def home(request):
         'user_count': 42,  # Example static data
     }
     return render(request, 'home.html', context)
+
+def game_list(request):
+    games = fetch_igdb_games()
+    return render(request, 'games.html', {'games': games})
 
 @login_required
 def profile_view(request):

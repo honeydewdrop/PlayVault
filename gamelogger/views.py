@@ -5,6 +5,7 @@ from django.contrib.auth import logout
 import json
 from requests import post
 from django.contrib.auth.decorators import login_required
+from .utils import fetch_igdb_games #sam
 
 # def age_ratings_view(request):
 #     # API request details
@@ -80,6 +81,10 @@ def register(request):
             return render(request, 'register.html', {'error': 'Passwords do not match'})
     
     return render(request, 'register.html')
+
+def game_list(request):
+    games = fetch_igdb_games()
+    return render(request, 'games.html', {'games': games})
 
 @login_required
 def profile_view(request):

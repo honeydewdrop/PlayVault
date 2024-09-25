@@ -1,7 +1,26 @@
 {% extends "navbar.html" %}
 
 {% block content %}
-    <h1>{{ greeting }}</h1>
-    <p>Games test.</p>
-    <!-- <p>We have {{ user_count }} users registered.</p> -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game List</title>
+</head>
+<body>
+    <h1>All Games</h1>
+    <div>
+        {% for game in games %}
+            <div>
+                <h2>{{ game.name }}</h2>
+                {% if game.cover %}
+                    <img src="{{ game.cover.url }}" alt="{{ game.name }}">
+                {% else %}
+                    <p>No image available</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+
 {% endblock %}
