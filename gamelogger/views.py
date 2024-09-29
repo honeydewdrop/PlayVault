@@ -5,31 +5,10 @@ from django.contrib.auth import logout
 import json
 from requests import post
 from django.contrib.auth.decorators import login_required
-from .utils import fetch_igdb_games #sam
-
-# def age_ratings_view(request):
-#     # API request details
-#     url = 'https://api.igdb.com/v4/age_ratings'
-#     headers = {
-#         'Client-ID': '5fx0c2tdp25zr3fuazhlqmwvezok4f',  # Replace with your actual Client ID
-#         'Authorization': 'Bearer 9xs6a5rq9q9i37q84ca5w82uasrwt9'  # Replace with your actual access token
-#     }
-#     data = 'fields category,checksum,content_descriptions,rating,rating_cover_url,synopsis;'
-
-#     # Make the request to the IGDB API
-#     try:
-#         response = post(url, headers=headers, data=data)
-
-#         # Check if the response is successful (200 OK)
-#         if response.status_code == 200:
-#             ratings = response.json()  # Parse the JSON response
-#         else:
-#             ratings = {'error': 'Failed to fetch data from IGDB API.'}
-#     except Exception as e:
-#         ratings = {'error': str(e)}  # Handle any exceptions
-
-#     # Pass the response data to the template
-#     return render(request, 'age_ratings.html', {'ratings': ratings})
+from .utils import fetch_all_igdb_games #sam
+from django.core.paginator import Paginator
+import logging
+logger = logging.getLogger(__name__)
 
 def logout_view(request):
     if request.method == 'POST':
@@ -82,9 +61,21 @@ def register(request):
     
     return render(request, 'register.html')
 
-def game_list(request):
-    games = fetch_igdb_games()
-    return render(request, 'games.html', {'games': games})
+async def game_list(request):
+    try:
+        # Fetch all games asynchronously
+        games = await fetch_all_igdb_games(total_games=500)
+    except Exception as e:
+        logger.exception(f"Failed to fetch games: {e}")
+        games = []
+
+    # Paginate the games
+    paginator = Paginator(games, 10)  # Display 10 games per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Render the template with paginated games
+    return render(request, 'games.html', context={'page_obj': page_obj})
 
 @login_required
 def profile_view(request):

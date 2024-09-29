@@ -4,7 +4,10 @@ from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
-from .utils import fetch_igdb_games
+from .utils import fetch_all_igdb_games #sam
+from django.core.paginator import Paginator
+import logging
+logger = logging.getLogger(__name__)
 
 def logout_view(request):
     if request.method == 'POST':
@@ -49,9 +52,21 @@ def home(request):
     }
     return render(request, 'home.html', context)
 
-def game_list(request):
-    games = fetch_igdb_games()
-    return render(request, 'games.html', {'games': games})
+async def game_list(request):
+    try:
+        # Fetch all games asynchronously
+        games = await fetch_all_igdb_games(total_games=500)
+    except Exception as e:
+        logger.exception(f"Failed to fetch games: {e}")
+        games = []
+
+    # Paginate the games
+    paginator = Paginator(games, 10)  # Display 10 games per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Render the template with paginated games
+    return render(request, 'games.html', context={'page_obj': page_obj})
 
 @login_required
 def profile_view(request):
