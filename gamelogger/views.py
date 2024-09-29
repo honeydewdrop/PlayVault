@@ -8,7 +8,20 @@ from django.contrib.auth.decorators import login_required
 from .utils import fetch_all_igdb_games #sam
 from django.core.paginator import Paginator
 import logging
+from asgiref.sync import sync_to_async
 logger = logging.getLogger(__name__)
+
+@sync_to_async
+def render_async(request, template, context):
+    return render(request, template, context)
+
+@sync_to_async
+def get_paginator(games, per_page):
+    return Paginator(games, per_page)
+
+@sync_to_async
+def get_page(paginator, page_number):
+    return paginator.get_page(page_number)
 
 def logout_view(request):
     if request.method == 'POST':
@@ -74,8 +87,17 @@ async def game_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Render the template with paginated games
-    return render(request, 'games.html', context={'page_obj': page_obj})
+    is_authenticated = await sync_to_async(getattr)(request.user, 'is_authenticated', False)
+
+    # Prepare context
+    context = {
+        'page_obj': page_obj,
+        'is_authenticated': is_authenticated,  # Pass this to the template
+    }
+
+    # Render the template asynchronously
+    response = await render_async(request, 'games.html', context)
+    return response
 
 @login_required
 def profile_view(request):

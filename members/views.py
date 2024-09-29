@@ -7,7 +7,16 @@ from django.contrib.auth.decorators import login_required
 from .utils import fetch_all_igdb_games #sam
 from django.core.paginator import Paginator
 import logging
+from asgiref.sync import sync_to_async
 logger = logging.getLogger(__name__)
+
+@sync_to_async
+def get_page(paginator, page_number):
+    return paginator.get_page(page_number)
+
+@sync_to_async
+def get_page(paginator, page_number):
+    return paginator.get_page(page_number)
 
 def logout_view(request):
     if request.method == 'POST':
