@@ -14,10 +14,6 @@ logger = logging.getLogger(__name__)
 def get_page(paginator, page_number):
     return paginator.get_page(page_number)
 
-@sync_to_async
-def get_page(paginator, page_number):
-    return paginator.get_page(page_number)
-
 def logout_view(request):
     if request.method == 'POST':
         logout(request)
@@ -77,8 +73,39 @@ async def game_list(request):
     # Render the template with paginated games
     return render(request, 'games.html', context={'page_obj': page_obj})
 
+
+
 @login_required
 def profile_view(request):
     # You can pass user-specific data to the profile page
     user = request.user
     return render(request, 'profile.html', {'user': user})
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .utils import fetch_all_igdb_games  # Ensure this is imported
+import logging
+import asyncio
+
+logger = logging.getLogger(__name__)
+
+async def fetch_all_igdb_games_sync(total_games=500):
+    """ Helper function to run the async function in a sync context. """
+    return await fetch_all_igdb_games(total_games)
+
+async def search(request):
+    query = request.GET.get('q')
+    results = []  # This will hold the search results
+
+    if query:
+        try:
+            # Fetch all games asynchronously
+            games = await fetch_all_igdb_games(total_games=500)  # Fetch games
+
+            # Filter games based on the query
+            results = [game for game in games if query.lower() in game['name'].lower()]
+        except Exception as e:
+            logger.exception(f"Failed to fetch games: {e}")
+            results = []
+
+    return render(request, 'search_results.html', {'results': results, 'query': query})

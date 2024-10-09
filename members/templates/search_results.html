@@ -1,0 +1,24 @@
+<!-- search_results.html -->
+{% extends "navbar.html" %}
+
+{% block content %}
+    <h1>Search Results for "{{ query }}"</h1>
+    {% if results %}
+        <ul>
+            {% for game in results %}
+                <li>
+                    <h2>{{ game.name }}</h2>
+                    {% if game.cover %}
+                    <img src="{{ game.cover.url }}" alt="{{ game.name }}">
+                    {% else %}
+                        <p>No image available</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No games found matching your query.</p>
+    {% endif %}
+{% endblock %}
+
+
