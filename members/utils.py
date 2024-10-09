@@ -56,5 +56,7 @@ async def fetch_all_igdb_games(total_games=500):
             # Respect rate limit by waiting asynchronously
             await asyncio.sleep(1)
 
+    
+
     return all_games
 
