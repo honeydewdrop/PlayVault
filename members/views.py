@@ -5,9 +5,11 @@ from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileUpdateForm
+from django.db import connection
 from .utils import fetch_all_igdb_games #sam
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import logging
+from django.db.models import Avg, Count
 from .models import Game
 from asgiref.sync import sync_to_async
 logger = logging.getLogger(__name__)
@@ -53,27 +55,51 @@ def sign_up(request):
     return render(request, 'registration/register.html', {'form': form})
 
 def home(request):
+    total_games = Game.objects.count()
+    avg_rating = Game.objects.aggregate(Avg('rating'))['rating__avg']
+    top_genres = Game.objects.values('genre').annotate(count=Count('id')).order_by('-count')[:5]
+    recent_games = Game.objects.order_by('-release_date')[:10]
+    
     context = {
-        'greeting': 'Welcome to the Home Page!',
-        'user_count': 42,  # Example static data
+        'total_games': total_games,
+        'avg_rating': avg_rating,
+        'top_genres': top_genres,
+        'recent_games': recent_games,
     }
-    return render(request, 'home.html', context)
-
 
 def game_list(request):
-    games = Game.objects.all().order_by('-rating')  # Order by rating, highest first
-    paginator = Paginator(games, 20)  # Show 20 games per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'members/game_list.html', {'page_obj': page_obj})
+    logger.info("Entering game_list view")
+    
+    # Count total games in the database
+    total_games = Game.objects.all()
+    logger.info(f"Total games in database: {total_games}")
 
-    # Paginate the games
-    paginator = Paginator(games, 10)  # Display 10 games per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    
+    # Set up pagination
+    paginator = Paginator(total_games, 100)
+    page_number = request.GET.get("page")
 
-    # Render the template with paginated games
-    return render(request, 'games.html', context={'page_obj': page_obj})
+    for game in total_games:
+       print(game.name)
+    
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page of results.
+        page_obj = paginator.page(paginator.num_pages)
+
+    # Prepare context for the template
+    context = {
+        "page_obj": page_obj,
+        "total_games": total_games,
+        "pacman_games_count": total_games.count(),
+        "games_per_page": 100,
+    }
+    
+    return render(request, 'game_list.html', {"page_obj": page_obj})
 
 @login_required
 def profile_view(request):
@@ -104,19 +130,79 @@ async def fetch_all_igdb_games_sync(total_games=500):
     """ Helper function to run the async function in a sync context. """
     return await fetch_all_igdb_games(total_games)
 
-async def search(request):
-    query = request.GET.get('q')
-    results = []  # This will hold the search results
+def search_games(request):
+    query = request.GET.get('q', '').strip().lower()
+    print(f"Search query: '{query}'")
 
-    if query:
-        try:
-            # Fetch all games asynchronously
-            games = await fetch_all_igdb_games(total_games=500)  # Fetch games
+    try:
+        # Get all games from the database
+        
+        all_games = Game.objects.all()
 
-            # Filter games based on the query
-            results = [game for game in games if query.lower() in game['name'].lower()]
-        except Exception as e:
-            logger.exception(f"Failed to fetch games: {e}")
-            results = []
+      
+        # Filter games based on the query
+        if query:
+            results = [game for game in all_games if query in game.name.lower()]
+        else:
+            results = list(all_games)
 
-    return render(request, 'search_results.html', {'results': results, 'query': query})
+        print(f"Total number of games: {len(results)}")
+
+        # Set up pagination
+        games_per_page = 20
+        paginator = Paginator(results, games_per_page)
+        total_pages = paginator.num_pages
+
+        # Iterate through all pages
+        all_games_count = 0
+        for page_number in range(1, total_pages + 1):
+            page = paginator.page(page_number)
+            for game in page:
+                all_games_count += 1
+                # Here you can process each game as needed
+                # For example, print every 10000th game:
+                if all_games_count % 10000 == 0:
+                    print(f"Processing game {all_games_count}: {game.name}")
+
+        print(f"Total games processed: {all_games_count}")
+
+        # For the actual view rendering, we'll use the requested page
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'page_obj': page_obj,
+            'query': query,
+            'total_results': len(results),
+            'total_games_processed': all_games_count,
+        }
+        return render(request, 'search_results.html', context)
+
+    except Exception as e:
+        logger.exception(f"Failed to process games: {e}")
+        context = {
+            'error': str(e),
+            'query': query,
+        }
+        return render(request, 'members/search_results.html', context)
+
+from django.shortcuts import render, get_object_or_404
+
+def game_detail(request, game_id):
+    game = get_object_or_404(Game, igdb_id=game_id)
+    return render(request, 'members/game_detail.html', {'game': game})
+
+def genre_games(request, genre):
+    games = Game.objects.filter(genre__icontains=genre).order_by('-rating')
+    paginator = Paginator(games, 20)  # Show 20 games per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'members/genre_games.html', {'page_obj': page_obj, 'genre': genre})
+
+def platform_games(request, platform):
+    games = Game.objects.filter(platforms__icontains=platform).order_by('-rating')
+    paginator = Paginator(games, 20)  # Show 20 games per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'members/platform_games.html', {'page_obj': page_obj, 'platform': platform})
+

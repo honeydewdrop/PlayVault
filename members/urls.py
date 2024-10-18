@@ -8,8 +8,9 @@ urlpatterns = [
     path('register/', views.sign_up, name='register'),
     path('', views.home, name='home'),
     path('profile/', views.profile_view, name='profile'),
-    path('games/', views.game_list, name='games'),
-    path('search/', views.search, name='search'),
+    path('games/', views.game_list, name='game_list'),
+    path("game/<int:game_id>/", views.game_detail, name='game_detail'),
+    path('search/', views.search_games, name='search'),
 ]
 
 if settings.DEBUG:

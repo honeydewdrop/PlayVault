@@ -25,10 +25,10 @@ urlpatterns = [
     path('members/', include('django.contrib.auth.urls')),
     path('members/', include('members.urls')),
     path('', views.home, name='home'),  # root path
-    path('logout/', views.logout_view, name='logout'),
-    path('profile/', views.profile_view, name='profile'),
-    path('games',views.game_list,name='games'),
-    path('search/', views.search, name='search')
+    # path('logout/', views.logout_view, name='logout'),
+    # path('profile/', views.profile_view, name='profile'),
+    # path('games',views.game_list,name='game_list'),
+    # path('search/', views.search, name='search')
 ]
 
 if settings.DEBUG:

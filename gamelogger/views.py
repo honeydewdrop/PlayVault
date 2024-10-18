@@ -96,7 +96,7 @@ async def game_list(request):
     }
 
     # Render the template asynchronously
-    response = await render_async(request, 'games.html', context)
+    response = await render_async(request, 'game_list.html', context)
     return response
 
 @login_required
