@@ -11,12 +11,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
+# Quick-start developmFent settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -55,14 +56,41 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'gamelogger.urls'
 
+
+DEBUG = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+# import os
+# from django.db import connection
+   
+#    # Increase timeout to 60 seconds
+# connection.settings_dict['OPTIONS'] = {
+#        'timeout': 60,
+# }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # settings.py
-import os
 
 # settings.py
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'NextLvl/members/templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'members/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,8 +116,12 @@ LOGIN_REDIRECT_URL = '/'  # Replace with the URL or URL name of your homepage
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'games',
+        'USER': 'samia4',
+        'PASSWORD': 'testpass1',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -128,7 +160,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

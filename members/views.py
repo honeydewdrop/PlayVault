@@ -4,9 +4,11 @@ from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
+from .forms import ProfileUpdateForm
 from .utils import fetch_all_igdb_games #sam
 from django.core.paginator import Paginator
 import logging
+from .models import Game
 from asgiref.sync import sync_to_async
 logger = logging.getLogger(__name__)
 
@@ -57,13 +59,13 @@ def home(request):
     }
     return render(request, 'home.html', context)
 
-async def game_list(request):
-    try:
-        # Fetch all games asynchronously
-        games = await fetch_all_igdb_games(total_games=500)
-    except Exception as e:
-        logger.exception(f"Failed to fetch games: {e}")
-        games = []
+
+def game_list(request):
+    games = Game.objects.all().order_by('-rating')  # Order by rating, highest first
+    paginator = Paginator(games, 20)  # Show 20 games per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'members/game_list.html', {'page_obj': page_obj})
 
     # Paginate the games
     paginator = Paginator(games, 10)  # Display 10 games per page
@@ -73,13 +75,22 @@ async def game_list(request):
     # Render the template with paginated games
     return render(request, 'games.html', context={'page_obj': page_obj})
 
-
-
 @login_required
 def profile_view(request):
-    # You can pass user-specific data to the profile page
-    user = request.user
-    return render(request, 'profile.html', {'user': user})
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated!')
+            return redirect('profile')
+    else:
+        form = ProfileUpdateForm(instance=request.user.profile)
+    
+    context = {
+        'form': form,
+        'user': request.user
+    }
+    return render(request, 'profile.html', context)
 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
