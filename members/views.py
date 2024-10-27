@@ -6,6 +6,7 @@ from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileUpdateForm
 from django.db import connection
+from members.models import Profile
 from .utils import fetch_all_igdb_games #sam
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import logging
@@ -71,7 +72,7 @@ def game_list(request):
     logger.info("Entering game_list view")
     
     # Count total games in the database
-    total_games = Game.objects.all()
+    total_games = Game.objects.all()[:1000]
     logger.info(f"Total games in database: {total_games}")
 
     
@@ -101,22 +102,17 @@ def game_list(request):
     
     return render(request, 'game_list.html', {"page_obj": page_obj})
 
-@login_required
 def profile_view(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
     if request.method == 'POST':
-        form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             messages.success(request, 'Your profile has been updated!')
             return redirect('profile')
     else:
-        form = ProfileUpdateForm(instance=request.user.profile)
-    
-    context = {
-        'form': form,
-        'user': request.user
-    }
-    return render(request, 'profile.html', context)
+        form = ProfileUpdateForm(instance=profile)
+    return render(request, 'profile.html', {'form': form})
 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -189,8 +185,8 @@ def search_games(request):
 from django.shortcuts import render, get_object_or_404
 
 def game_detail(request, game_id):
-    game = get_object_or_404(Game, igdb_id=game_id)
-    return render(request, 'members/game_detail.html', {'game': game})
+    game = get_object_or_404(Game, igdb_id=game_id)  # Assuming igdb_id is the unique identifier
+    return render(request, 'game_detail.html', {'game': game})
 
 def genre_games(request, genre):
     games = Game.objects.filter(genre__icontains=genre).order_by('-rating')

@@ -65,7 +65,7 @@ async def fetch_all_igdb_games(total_games=286000):
         async def fetch_games(offset):
             async with semaphore:
                 url = 'https://api.igdb.com/v4/games'
-                data = f'''fields id, name, cover.url, genres.name, platforms.name, summary, first_release_date, rating;
+                data = f'''fields id, name, cover.url, genres.name, platforms.name, summary, first_release_date, rating, involved_companies, age_ratings. screenshots;
                            limit {limit};
                            offset {offset};'''
                 

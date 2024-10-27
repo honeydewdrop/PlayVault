@@ -1,0 +1,13 @@
+<!-- members/templates/members/game_detail.html -->
+{% extends "navbar.html" %}
+{% block content %}
+<h1>{{ game.name }}</h1>
+{% if game.cover_url %}
+    <img src="{{ game.cover_url }}" alt="{{ game.name }}">
+{% endif %}
+<p><strong>Genre:</strong> {{ game.genre }}</p>
+<p><strong>Rating:</strong> {{ game.rating }}</p>
+<p><strong>Description:</strong> {{ game.description }}</p>
+<p><strong>Release Date:</strong> {{ game.release_date }}</p>
+<p><strong>Platforms:</strong> {{ game.platforms }}</p>
+{% endblock %}
