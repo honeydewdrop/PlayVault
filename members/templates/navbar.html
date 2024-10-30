@@ -1,61 +1,55 @@
 <!DOCTYPE html>
-<!-- sam -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Website{% endblock %}</title>
-    {% block extra_css %}{% endblock %}
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="bg-gradient-to-r from-cyan-500 to-blue-500"></div>
+    <nav class="bg-black navbar navbar-expand-lg navbar-dark"> <!-- Set navbar background to black -->
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">PlayVault</a>
+            <a class="navbar-brand text-3xl font-mono text-gray-400" href="{% url 'home' %}">PlayVault</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav flex flex-row space-x-4"> <!-- Use flex and space-x-4 for horizontal spacing -->
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <form method="post" action="{% url 'logout' %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link">Logout</button>
+                                <button type="submit" class="btn btn-link nav-link text-red-400 hover:text-gray-300">Logout</button>
                             </form>
                         </li>
                         <li class="nav-item">
                             <form method="post" action="{% url 'profile' %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link">Profile</button>
+                                <button type="submit" class="btn btn-link nav-link text-red-400 hover:text-gray-300">Profile</button>
                             </form>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link text-red-400 hover:text-gray-300" href="{% url 'login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                            <a class="nav-link text-red-400 hover:text-gray-300" href="{% url 'register' %}">Register</a>
                         </li>
                     {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'game_list' %}">Games</a>
+                        <a class="nav-link text-red-400 hover:text-gray-300" href="{% url 'game_list' %}">Games</a>
                     </li>
-
-                    <form class="d-flex" method="get" action="{% url 'search' %}">
-                        <input class="form-control me-2" type="search" placeholder="Search games" aria-label="Search" name="q">
-                        <button class="btn btn-outline-success" type="submit">Search</button>
-                    </form>
-
-                    
-
-
                 </ul>
+                <form class="d-flex" method="get" action="{% url 'search' %}">
+                    <input class="form-control me-2" type="search" placeholder="Search games" aria-label="Search" name="q">
+                    <button class="btn btn-outline-success text-gray-400" type="submit">Search</button>
+                </form>
             </div>
         </div>
     </nav>
-    <div class="container mt-4">
+    <div class="container mx-auto mt-4"> <!-- Use mx-auto to center the container -->
         {% block content %}
         {% endblock %}
     </div>

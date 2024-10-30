@@ -5,7 +5,7 @@ from django.conf import settings
 from django.utils import timezone
 import time
 from django.db.utils import OperationalError
-from .models import Game
+from .models import Game, Screenshot
 from django.db import transaction
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,9 @@ async def save_games_to_db(games):
                     'description': game.get('summary'),
                     'release_date': convert_timestamp(game.get('first_release_date')),
                     'rating': game.get('rating'),
-                    'last_updated': timezone.now()
+                    'last_updated': timezone.now(),
+                    'involved_companies': ', '.join([company['name'] for company in game.get('company', [])]),
+                    'age_rating': game.get('age_rating')
                 }
             )
 
@@ -65,7 +67,7 @@ async def fetch_all_igdb_games(total_games=286000):
         async def fetch_games(offset):
             async with semaphore:
                 url = 'https://api.igdb.com/v4/games'
-                data = f'''fields id, name, cover.url, genres.name, platforms.name, summary, first_release_date, rating, involved_companies, age_ratings. screenshots;
+                data = f'''fields id, name, cover.url, genres.name, platforms.name, summary, first_release_date, rating, involved_companies, age_ratings, screenshots;
                            limit {limit};
                            offset {offset};'''
                 
