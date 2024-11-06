@@ -1,0 +1,39 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Global body styling */
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    background-color: #0C081E;
+    font-family: 'Impact', Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    color: #D298F9;
+}
+
+/* Common section styling */
+.section {
+    background-color: #0C081E;
+    color: #D298F9;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Headings and paragraph styling */
+h1, h2 {
+    color: #D298F9;
+    text-shadow: 5px 5px 8px rgba(0, 0, 0, 0.9);
+}
+
+p {
+    color: #D298F9;
+    text-shadow: 5px 5px 8px rgba(0, 0, 0, 0.9);
+}

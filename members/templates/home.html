@@ -1,57 +1,91 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block content %}
-
 <style>
-    h1 {
-      color: white;
-      font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-      font-size: 300%;
-      margin-top: 300px;
-    }
-    p {
-      color: white;
-      font-family: courier;
-      font-size: 160%;
-      margin-top: 20px;
-    }
- 
-    body {
+    /* Global reset to remove any margin or padding */
+    * {
         margin: 0;
-        height: 100vh;
-        background: 
-            linear-gradient(to bottom, transparent 40%, #000000 50%),
-            url("{% static 'assets/gamebg.jpg' %}");
-        background-size: cover, cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        padding: 0;
+        box-sizing: border-box; /* Ensures padding and borders don't affect width/height calculations */
     }
 
-    .center-content {
-        display: flex;
+    /* Ensure html and body cover the full screen */
+    html, body {
+        height: 100%;
+        width: 100%;
+        overflow-x: hidden; /* Prevent horizontal overflow */
+        background-color: #0C081E; /* Set the background color outside the content area */
+        font-family: 'Impact', Haettenschweiler, 'Arial Narrow Bold', sans-serif; /* Reverted to the original font */
+    }
+
+    /* Welcome section styles */
+    .welcome-section {
+        height: 100vh; /* Full viewport height for the welcome section */
+        background: 
+            linear-gradient(to bottom, #010105 0%, transparent 40%),
+            url("{% static 'assets/gamebg.jpg' %}") no-repeat center center fixed; /* Fix background position */
+        background-size: cover; /* Cover the entire background */
+        display: flex; /* Flexbox to center content */
         justify-content: center;
         align-items: center;
+        color: #D298F9; /* Set text color to the purple #D298F9 */
+        flex-direction: column;
+        position: relative;
+        width: 100%; /* Ensure it extends to full width */
+    }
+
+    /* Full black section below the welcome section */
+    .black-section {
+        background-color: #0C081E; /* Black background */
+        color: #D298F9; /* Set text color to the purple #D298F9 */
+        padding: 40px; /* Add some padding for content */
+        min-height: 100vh; /* Ensures that this section fills the viewport height */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%; /* Ensure it extends to full width */
+    }
+
+    /* Additional styling for text */
+    h1 {
+        font-size: 350%; /* Increased font size */
+        color: #D298F9; /* Purple text */
+        margin-top: 150px;
+        text-shadow: 6px 6px 10px rgba(0, 0, 0, 1); /* Bigger and darker shadow */
+    }
+
+    p {
+        color: #D298F9; /* Purple text */
+        font-size: 180%; /* Increased font size */
+        margin-top: 20px;
+        text-shadow: 5px 5px 8px rgba(0, 0, 0, 0.9); /* Bigger and darker shadow */
+    }
+
+    h2 {
+        color: #D298F9; /* Purple text */
         text-align: center;
-        height: 100%;
-        color: white;
-        font-family: Arial, sans-serif;
+        text-shadow: 5px 5px 8px rgba(0, 0, 0, 0.9); /* Bigger and darker shadow */
     }
 </style>
 
-<div class="center-content">
-    <div>
-        <h1>Welcome to PlayVault!</h1>
-        <p>Track, review, and analyze your favorite games.</p>
-        {% if user.is_authenticated %}
-            <p>Hello, {{ user.username }}!</p>
-        {% endif %}
-        <p>What is PlayVault?</p>
-        <p style="font-family: sans-serif; font-size: 100%;">PlayVault lets you organize your game collection online. 
-        Stay on top of your backlog, rate games you've completed, and add upcoming titles to your planning list. 
-        Follow friends and share your gaming experiences to stay updated on their latest sessions.</p>
-    </div>
+<!-- Welcome Section -->
+<div class="welcome-section">
+    <h1>Welcome to PlayVault!</h1>
+    <p>Track, review, and analyze your favorite games.</p>
+    {% if user.is_authenticated %}
+        <p>Hello, {{ user.username }}!</p>
+    {% endif %}
+    <p>What is PlayVault?</p>
+
+</div>
+
+<!-- Full black section below -->
+<div class="black-section">
+    <p>PlayVault lets you organize your game collection online. Stay on top of your backlog, rate games you've completed, 
+        and add upcoming titles to your planning list. Follow friends and share your gaming experiences to stay updated on 
+        their latest sessions.</p>
 </div>
 
 {% endblock %}

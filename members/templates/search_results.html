@@ -2,23 +2,113 @@
 {% extends "navbar.html" %}
 
 {% block content %}
-    <h1>Search Results for "{{ query }}"</h1>
-    {% if results %}
-        <ul>
-            {% for game in results %}
-                <li>
-                    <h2>{{ game.name }}</h2>
-                    {% if game.cover %}
-                    <img src="{{ game.cover.url }}" alt="{{ game.name }}">
-                    {% else %}
-                        <p>No image available</p>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No games found matching your query.</p>
-    {% endif %}
+    <!-- Add custom styles for the search results page -->
+    <style>
+        /* Global reset for main content */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+            background-color: #0C081E; /* Background color */
+            font-family: 'Impact', Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        }
+
+        /* Make sure navbar is unaffected by the styles */
+        nav, .navbar, .navbar-nav, .nav-item, .nav-link {
+            box-sizing: content-box; /* Ensure navbar uses its original box model */
+            background-color: transparent !important; /* Prevent navbar from taking background styles */
+            color: inherit !important; /* Keep navbar button colors from overriding */
+        }
+
+        /* Container for the page */
+        .container {
+            padding-top: 30px;
+        }
+
+        /* Pagination styling */
+        .pagination {
+            background-color: #0C081E;
+            color: #D298F9;
+        }
+
+        /* Styling for each game card */
+        .card {
+            background-color: #1C1B29;
+            border: 1px solid #3b3a49;
+        }
+
+        .card-body {
+            color: #D298F9;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+        }
+
+        /* No image available styling */
+        .text-muted {
+            font-size: 1.2rem;
+        }
+
+        /* Search results styling */
+        h1 {
+            color: #D298F9;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            background-color: #1C1B29;
+            border: 1px solid #3b3a49;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+
+        h2 {
+            color: #D298F9;
+            font-size: 1.5rem;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .text-muted {
+            color: #D298F9;
+            font-size: 1.2rem;
+        }
+    </style>
+
+    <!-- Search Results content -->
+    <div class="container mt-5">
+        <h1>Search Results for "{{ query }}"</h1>
+        {% if results %}
+            <ul>
+                {% for game in results %}
+                    <li>
+                        <h2>{{ game.name }}</h2>
+                        {% if game.cover %}
+                            <img src="{{ game.cover.url }}" alt="{{ game.name }}">
+                        {% else %}
+                            <p class="text-muted">No image available</p>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted text-center">No games found matching your query.</p>
+        {% endif %}
+    </div>
 {% endblock %}
-
-
