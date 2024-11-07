@@ -1,27 +1,119 @@
-<!-- {% extends "navbar.html" %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{% block title %}My Website{% endblock %}</title>
-</head>
-<body>
-    <header>
-       <h1>Welcome to GameLogger!</h1>
-    </header>
     
-    <nav>
+    
+    {% extends "navbar.html" %}
+    <!DOCTYPE html>
+    
+    <html lang="en">
+    <head>
+        <title>{% block title %}My Website{% endblock %}</title>
+        <style>
+            /* Ensure the body and html have no margin or padding */
+            
+            html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden; /* Prevents overflow */
+            }
 
-    </nav>
-    
-    <main>
-        {% block content %}
-       
-        <h1>Welcome to GameLogger!</h1> 
-        {% endblock %}
-    </main>
-    
-    <footer>
-        <p>Created in 2024</p>>
-    </footer>
-</body>
-</html> -->
+            /* Main container for your content */
+            main {
+                height: 100%;
+                overflow-y: auto; /* Allows vertical scrolling */
+            }
+
+            /* Loading screen styles */
+            #loading {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                display: none; /* Hidden by default */
+            }
+
+            .spinner {
+                border: 8px solid #f3f3f3; /* Light grey */
+                border-top: 8px solid #3498db; /* Blue */
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Loading screen at the very top of the body -->
+        <div id="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <header>
+        <h1>Welcome to GameLogger!</h1>
+        </header>
+        
+        <nav>
+            <!-- Navigation content can go here -->
+        </nav>
+
+        <main>
+            {% block content %}
+            <!-- Default content (e.g., for 404 pages or unmodified templates) -->
+            <h1>Welcome to GameLogger!</h1>
+            <button id="loadMoreBtn">Load More</button> 
+            <div id="content"></div> 
+            {% endblock %}
+        </main>
+        
+        <footer>
+            <p>Created in 2024</p>
+        </footer>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+
+        <script>
+            // Function to show the loading spinner
+            function showLoadingSpinner() {
+                document.getElementById('loading').style.display = 'flex';  
+            }
+
+            // Function to hide the loading spinner
+            function hideLoadingSpinner() {
+                document.getElementById('loading').style.display = 'none';  
+            }
+
+            $(document).ready(function() {
+                $("#loadMoreBtn").click(function() {
+                    showLoadingSpinner(); 
+                    $.ajax({
+                        url: '{% url "load_game_data" %}',
+                        method: 'GET',
+                        success: function(response) {
+                            setTimeout(function() { 
+                                hideLoadingSpinner(); 
+                                $('#content').append("<p>" + response.game_details + "</p>");
+                            }, 1000); 
+                        },
+                        error: function() {
+                            setTimeout(function() { 
+                                hideLoadingSpinner(); 
+                                alert('Error loading more data!');
+                            }, 1000); 
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+
+    </html>

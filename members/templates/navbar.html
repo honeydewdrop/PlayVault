@@ -4,54 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Website{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Styling for the navbar */
+        .navbar {
+            padding: 1.5rem 0;
+            background-color: rgba(0, 0, 0, 0.7); /* Translucent background */
+            border-bottom: 4px solid #D198F8; /* Purple line at the bottom */
+        }
+        .navbar-brand {
+            font-size: 1.8em;
+            font-weight: bold;
+            letter-spacing: 3px; /* Increase space between letters */
+        }
+        .navbar-nav {
+            font-size: 1.2em;
+            margin-left: auto; /* Align to the left */
+        }
+        .navbar-dark .navbar-nav .nav-link:hover {
+            color: #f8f9fa;
+        }
+
+        /* Custom styling for search bar and button */
+        .search-bar {
+            max-width: 400px;
+            width: 100%;
+            margin-left: 15px;
+        }
+        .search-input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border: none;
+            padding: 8px 15px;
+            font-size: 1rem;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .search-btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            padding: 8px 20px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .search-btn:hover {
+            background-color: #218838;
+        }
+    </style>
 </head>
 <body>
-    <nav class="bg-black navbar navbar-expand-lg navbar-dark"> <!-- Set navbar background to black -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand text-3xl font-mono text-gray-400" href="{% url 'home' %}">PlayVault</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
+            <a class="navbar-brand mx-auto" href="{% url 'home' %}">PlayVault</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" 
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav flex flex-row space-x-4"> <!-- Use flex and space-x-4 for horizontal spacing -->
+                <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}">
+                            <form method="post" action="{% url 'logout' %}" class="d-inline">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link text-red-400 hover:text-gray-300">Logout</button>
+                                <button type="submit" class="btn btn-link nav-link">Logout</button>
                             </form>
                         </li>
                         <li class="nav-item">
-                            <form method="post" action="{% url 'profile' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-link nav-link text-red-400 hover:text-gray-300">Profile</button>
-                            </form>
+                            <a class="nav-link" href="{% url 'profile' %}">Profile</a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link text-red-400 hover:text-gray-300" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-red-400 hover:text-gray-300" href="{% url 'register' %}">Register</a>
+                            <a class="nav-link" href="{% url 'register' %}">Register</a>
                         </li>
                     {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link text-red-400 hover:text-gray-300" href="{% url 'game_list' %}">Games</a>
+                        <a class="nav-link" href="{% url 'games' %}">Games</a>
                     </li>
                 </ul>
-                <form class="d-flex" method="get" action="{% url 'search' %}">
-                    <input class="form-control me-2" type="search" placeholder="Search games" aria-label="Search" name="q">
-                    <button class="btn btn-outline-success text-gray-400" type="submit">Search</button>
+
+                <!-- Search Form -->
+                <form class="d-flex search-bar my-2 my-lg-0" method="get" action="{% url 'search' %}">
+                    <input class="form-control search-input" type="search" placeholder="Search games" aria-label="Search" name="q">
+                    <button class="btn search-btn" type="submit">Search</button>
                 </form>
             </div>
-        </div>
+        </div>  
     </nav>
-    <div class="container mx-auto mt-4"> <!-- Use mx-auto to center the container -->
+
+    <div class="container mt-4">
         {% block content %}
         {% endblock %}
     </div>
-    {% block extra_js %}{% endblock %}
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
