@@ -11,15 +11,11 @@
                     <h2>
                         <a href="{% url 'game_detail' game.igdb_id %}">{{ game.name }}</a>
                     </h2>
-                    <h2>{{ game.name }}</h2>
                     {% if game.cover_url %}
                         <img src="{{ game.cover_url }}" alt="{{ game.name }}">
                     {% else %}
                         <p>No image available</p>
                     {% endif %}
-                    <p>Genre: {{ game.genre }}</p>
-                    <p>Platforms: {{ game.platforms }}</p>
-                    <p>Rating: {{ game.rating|floatformat:1 }}</p>
                 </li>
             {% empty %}
                 <li>No games in this page (this shouldn't happen if total_results > 0)</li>

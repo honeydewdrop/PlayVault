@@ -1,0 +1,6 @@
+
+members/migrations/*
+members/__pycache__/*
+members/management/commands/**/*
+
+members/management/commands/*.py

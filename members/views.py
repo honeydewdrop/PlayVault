@@ -71,11 +71,17 @@ def home(request):
 def game_list(request):
     logger.info("Entering game_list view")
     
+    # Check for sort parameter
+    sort_order = request.GET.get("sort")
+    
     # Count total games in the database
-    total_games = Game.objects.all()[:1000]
+    if sort_order == 'abc':
+        total_games = Game.objects.all().order_by('name')[:1000]  # Sort alphabetically
+    else:
+        total_games = Game.objects.all()[:1000]  # Default order
+    
     logger.info(f"Total games in database: {total_games}")
 
-    
     # Set up pagination
     paginator = Paginator(total_games, 100)
     page_number = request.GET.get("page")
@@ -96,7 +102,7 @@ def game_list(request):
     context = {
         "page_obj": page_obj,
         "total_games": total_games,
-        "pacman_games_count": total_games.count(),
+        "games_count": total_games.count(),
         "games_per_page": 100,
     }
     

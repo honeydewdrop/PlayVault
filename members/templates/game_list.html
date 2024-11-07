@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
     <h1>Games</h1>
-
+    <a href="{% url 'game_list' %}?sort=abc">A-Z Order</a>
     {% if page_obj.object_list %}
     {% for game in page_obj %}
     <div>

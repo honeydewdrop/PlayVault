@@ -21,18 +21,17 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 class Company(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=10000, blank=True, null=True)  # Changed to CharField with max_length
     description = models.TextField(blank=True, null=True)
     country = models.IntegerField(blank=True, null=True)  # ISO 3166-1 country code
     logo = models.URLField(blank=True, null=True)  # URL for the company logo
     url = models.URLField(blank=True, null=True)  # Official website URL
     created_at = models.DateTimeField(blank=True, null=True)  # Date added to IGDB
     updated_at = models.DateTimeField(blank=True, null=True)  # Last updated date
-    start_date = models.DateTimeField(blank=True, null=True)  # Date founded
-    slug = models.SlugField(unique=True)  # URL-safe version of the name
+    slug = models.SlugField(max_length=10000, unique=True)  # Ensure slug has a max_length
 
     def __str__(self):
-        return self.name
+        return self.name if self.name else "Unnamed Company"
     
 class Game(models.Model):
     igdb_id = models.IntegerField(unique=True)
