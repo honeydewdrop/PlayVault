@@ -13,14 +13,24 @@ class RegisterForm(UserCreationForm):
         model=User
         fields = ['username','email','password1','password2'] 
 
-from django import forms
-from .models import Profile
-
-class ProfileUpdateForm(forms.ModelForm):
+class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['profile_picture', 'biography']
+        fields = ['profile_picture', 'header_image', 'biography']
+
+from django import forms
+from .models import ReviewsFixed
+
+class ReviewsFixedForm(forms.ModelForm):
+    class Meta:
+        model = ReviewsFixed
+        fields = ['reviewtext', 'rating']  # Ensure 'user' is not included here as it is set in the view
+
+        labels = {
+            'reviewtext': 'Review Text',
+            'rating': 'Rating (1-5)',
+        }
         widgets = {
-            'profile_picture': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
-            'biography': forms.Textarea(attrs={'rows': 4}),
+            'reviewtext': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+            'rating': forms.Select(choices=[(i, i) for i in range(1, 6)]),
         }

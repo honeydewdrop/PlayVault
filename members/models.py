@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -64,6 +65,33 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     biography = models.TextField(max_length=500, blank=True)
+    header_image = models.ImageField(upload_to='header_pics/', blank=True, null=True)
 
     def __str__(self):
         return f'{self.user.username} Profile'
+    
+class ReviewsFixed(models.Model):
+    game = models.ForeignKey('Game', related_name='reviews', on_delete=models.CASCADE)  # Ensure Game model is defined
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    reviewtext = models.TextField()
+    rating = models.PositiveSmallIntegerField(
+        default=3,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )  # Enforce rating range from 1 to 5
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.game.name}"
+    
+class NewReviewsFixed(models.Model):
+       game = models.ForeignKey('Game', related_name='new_reviews', on_delete=models.CASCADE)
+       user = models.ForeignKey(User, on_delete=models.CASCADE)
+       reviewtext = models.TextField()
+       rating = models.PositiveSmallIntegerField(
+           default=1,
+           validators=[MinValueValidator(1), MaxValueValidator(5)]
+       )
+       created_at = models.DateTimeField(default=timezone.now)
+
+       def __str__(self):
+           return f"{self.user.username} - {self.game.name}"

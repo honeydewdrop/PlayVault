@@ -4,12 +4,13 @@ from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
-from .forms import ProfileUpdateForm
+from .forms import ProfileForm, ReviewsFixedForm
 from django.db import connection
-from members.models import Profile
+from members.models import Profile, ReviewsFixed
 from .utils import fetch_all_igdb_games #sam
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import logging
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Avg, Count
 from .models import Game
 from asgiref.sync import sync_to_async
@@ -110,23 +111,17 @@ def game_list(request):
 
 def profile_view(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
+
     if request.method == 'POST':
-        form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Your profile has been updated!')
-            return redirect('profile')
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('profile')  # Redirect to the same profile page or another page
     else:
-        form = ProfileUpdateForm(instance=profile)
-    return render(request, 'profile.html', {'form': form})
+        form = ProfileForm(instance=profile)
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .utils import fetch_all_igdb_games  # Ensure this is imported
-import logging
-import asyncio
-
-logger = logging.getLogger(__name__)
+    return render(request, 'members/profile.html', {'form': form, 'profile': profile})
 
 async def fetch_all_igdb_games_sync(total_games=500):
     """ Helper function to run the async function in a sync context. """
@@ -192,6 +187,7 @@ from django.shortcuts import render, get_object_or_404
 
 def game_detail(request, game_id):
     game = get_object_or_404(Game, igdb_id=game_id)  # Assuming igdb_id is the unique identifier
+    reviews = ReviewsFixed.objects.filter(game=game)
     return render(request, 'game_detail.html', {'game': game})
 
 def genre_games(request, genre):
@@ -208,3 +204,34 @@ def platform_games(request, platform):
     page_obj = paginator.get_page(page_number)
     return render(request, 'members/platform_games.html', {'page_obj': page_obj, 'platform': platform})
 
+# members/views.py
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import ReviewsFixedForm
+from .models import ReviewsFixed, Game
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def submit_review(request):
+       if request.method == 'POST':
+           print("Form submitted")  # Debugging line
+           form = ReviewsFixedForm(request.POST)
+           if form.is_valid():
+               print("Form is valid")  # Debugging line
+               try:
+                   review = form.save(commit=False)
+                   review.user = request.user
+                   review.game = get_object_or_404(Game, id=request.POST.get('game_id'))
+                   review.save()
+                   return JsonResponse({
+                       'username': review.user.username,
+                       'reviewtext': review.reviewtext,
+                       'rating': review.rating,
+                   })
+               except Exception as e:
+                   print("Error saving review:", e)  # Print any errors that occur
+                   return JsonResponse({'error': 'Error saving review'}, status=500)
+           else:
+               print("Form errors:", form.errors)  # Print form errors for debugging
+               return JsonResponse({'error': 'Invalid form submission', 'details': form.errors}, status=400)
+       return JsonResponse({'error': 'Invalid request method'}, status=400)

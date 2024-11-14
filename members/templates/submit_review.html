@@ -1,0 +1,28 @@
+<!-- members/templates/members/submit_review.html -->
+
+{% extends 'base.html' %}  <!-- Extend your base template -->
+
+{% block content %}
+    <h2>Submit a Review</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div>
+            {{ form.game.label_tag }} {{ form.game }}  <!-- Game selection -->
+            {{ form.game.errors }}
+        </div>
+        <div>
+            {{ form.user.label_tag }} {{ form.user }}  <!-- User field (optional, usually set automatically) -->
+            {{ form.user.errors }}
+        </div>
+        <div>
+            {{ form.reviewtext.label_tag }} {{ form.reviewtext }}  <!-- Review text area -->
+            {{ form.reviewtext.errors }}
+        </div>
+        <div>
+            {{ form.rating.label_tag }} {{ form.rating }}  <!-- Rating dropdown -->
+            {{ form.rating.errors }}
+        </div>
+        <button type="submit">Submit Review</button>
+    </form>
+{% endblock %}
