@@ -3,6 +3,11 @@
 
 {% block content %}
 <div class="min-h-screen bg-gradient-to-t from-black to-red-500 p-6">
+    {% if header_image %} <!-- Check for header_image instead -->
+    <div class="mb-6">
+        <img src="{{ header_image }}" alt="{{ game.name }} Screenshot" class="rounded-lg h-64 w-full object-cover shadow-lg mb-4"> <!-- Use header_image -->
+    </div>
+{% endif %}
     <h1 class="text-4xl font-bold text-black mb-4">{{ game.name }}</h1>
     <p class="sub-title text-black">Released on {{ game.release_date }}</p>
 

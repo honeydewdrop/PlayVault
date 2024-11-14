@@ -185,14 +185,22 @@ def search_games(request):
 
 from django.shortcuts import render, get_object_or_404
 
+# members/views.py
+
+from django.shortcuts import render, get_object_or_404
+from members.models import Game
+
 def game_detail(request, game_id):
-       game = get_object_or_404(Game, igdb_id=game_id)
-       reviews = ReviewsFixed.objects.filter(game=game).select_related('user')  # Fetch reviews for the game
-       context = {
-           'game': game,
-           'reviews': reviews,
-       }
-       return render(request, 'game_detail.html', context)
+    game = get_object_or_404(Game, id=game_id)
+    screenshots = game.game_screenshots.all()  # Fetch all screenshots related to the game
+    header_image = screenshots.first().url if screenshots.exists() else None  # Get the first screenshot URL for the header
+
+    context = {
+        'game': game,
+        'screenshots': screenshots,  # Pass all screenshots to the template
+        'header_image': header_image,  # Pass the header image to the template
+    }
+    return render(request, 'game_detail.html', context)
 
 def genre_games(request, genre):
     games = Game.objects.filter(genre__icontains=genre).order_by('-rating')
