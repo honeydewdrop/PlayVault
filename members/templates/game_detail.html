@@ -1,3 +1,10 @@
+<style>
+    .header-image {
+        width: 110%;
+        height: auto; /* Maintain aspect ratio */
+    }
+</style>
+
 {% extends "navbar.html" %}
 {% block title %}Game Detail - {{ game.name }}{% endblock %}
 
@@ -5,7 +12,7 @@
 <div class="min-h-screen bg-gradient-to-t from-black to-red-500 p-6">
     {% if header_image %} <!-- Check for header_image instead -->
     <div class="mb-6">
-        <img src="{{ header_image }}" alt="{{ game.name }} Screenshot" class="rounded-lg h-64 w-full object-cover shadow-lg mb-4"> <!-- Use header_image -->
+        <img src="{{ header_image }}" alt="{{ game.name }} Screenshot" class="header-image object-cover shadow-lg mb-4"> <!-- Use header_image -->
     </div>
 {% endif %}
     <h1 class="text-4xl font-bold text-black mb-4">{{ game.name }}</h1>
