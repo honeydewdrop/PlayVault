@@ -4,40 +4,39 @@
     <h1>Welcome, {{ user.username }}!</h1>
 
     {% if profile.header_image %}
-        <img src="{{ profile.header_image.url }}" alt="Header Image" style="width: 100%; height: auto;">
+        <img id="header-image" src="{{ profile.header_image.url }}" alt="Header Image" style="width: 100%; height: auto;">
     {% else %}
         <p>No header image uploaded yet.</p>
     {% endif %}
 
     {% if profile.profile_picture %}
-        <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" style="width: 150px; height: 150px;">
+        <img id="profile-picture" src="{{ profile.profile_picture.url }}" alt="Profile Picture" style="width: 150px; height: 150px;">
     {% else %}
         <p>No profile picture uploaded yet.</p>
     {% endif %}
 
     <h2>Your Biography</h2>
-    <p>{{ profile.biography }}</p>
+    <p id="biography-text">{{ profile.biography }}</p>
 
-    <h3>Update Profile</h3>
-    <form method="post" enctype="multipart/form-data">
+    <form id="profile-picture-form" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.non_field_errors }}
-        <div>
-            <label for="{{ form.profile_picture.id_for_label }}">Profile Picture:</label>
-            {{ form.profile_picture }}
-            {{ form.profile_picture.errors }}
-        </div>
-        <div>
-            <label for="{{ form.header_image.id_for_label }}">Header Image:</label>
-            {{ form.header_image }}
-            {{ form.header_image.errors }}
-        </div>
-        <div>
-            <label for="{{ form.biography.id_for_label }}">Biography:</label>
-            <textarea name="biography" id="{{ form.biography.id_for_label }}" rows="4">{{ profile.biography }}</textarea>
-            {{ form.biography.errors }}
-        </div>
-        <button type="submit">Update Profile</button>
+        <h2>Update Profile Picture</h2>
+        {{ profile_picture_form.as_p }}
+        <button type="submit" name="profile_picture">Update Profile Picture</button>
+    </form>
+    
+    <form id="header-image-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h2>Update Header Image</h2>
+        {{ header_image_form.as_p }}
+        <button type="submit" name="header_image">Update Header Image</button>
+    </form>
+    
+    <form id="biography-form" method="post">
+        {% csrf_token %}
+        <h2>Update Biography</h2>
+        {{ biography_form.as_p }}
+        <button type="submit" name="biography">Update Biography</button>
     </form>
 
     {% if messages %}
@@ -60,4 +59,70 @@
 {% else %}
     <p>You have no saved games.</p>
 {% endif %}
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+$(document).ready(function() {
+    // AJAX for Profile Picture
+    $('#profile-picture-form').on('submit', function(e) {
+        e.preventDefault(); // Prevent the default form submission
+        var formData = new FormData(this); // Create FormData object
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "profile_view" %}', // Update with your URL
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    $('#profile-picture').attr('src', response.profile_picture_url); // Update the image
+                } else {
+                    alert('Failed to update profile picture.');
+                }
+            }
+        });
+    });
+
+    // AJAX for Header Image
+    $('#header-image-form').on('submit', function(e) {
+        e.preventDefault(); // Prevent the default form submission
+        var formData = new FormData(this); // Create FormData object
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "profile_view" %}', // Update with your URL
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    $('#header-image').attr('src', response.header_image_url); // Update the image
+                } else {
+                    alert('Failed to update header image.');
+                }
+            }
+        });
+    });
+
+    // AJAX for Biography
+    $('#biography-form').on('submit', function(e) {
+        e.preventDefault(); // Prevent the default form submission
+        var formData = $(this).serialize(); // Serialize the form data
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "profile_view" %}', // Update with your URL
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    $('#biography-text').text(response.biography); // Update the biography text
+                } else {
+                    alert('Failed to update biography.');
+                }
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

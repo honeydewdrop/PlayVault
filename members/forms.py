@@ -13,10 +13,20 @@ class RegisterForm(UserCreationForm):
         model=User
         fields = ['username','email','password1','password2'] 
 
-class ProfileForm(forms.ModelForm):
+class ProfilePictureForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['profile_picture', 'header_image', 'biography']
+        fields = ['profile_picture']
+
+class HeaderImageForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['header_image']
+
+class BiographyForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['biography']
 
 class ReviewsFixedForm(forms.ModelForm):
     class Meta:

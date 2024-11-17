@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
-from .forms import ProfileForm, ReviewsFixedForm, StatusForm
+from .forms import ProfilePictureForm, HeaderImageForm, BiographyForm, ReviewsFixedForm, StatusForm
 from django.db import connection
 from members.models import Profile, GameStatus
 from .utils import fetch_all_igdb_games #sam
@@ -13,6 +14,7 @@ import logging
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Avg, Count
 from .models import Game
+from django.shortcuts import render, get_object_or_404
 from asgiref.sync import sync_to_async
 logger = logging.getLogger(__name__)
 
@@ -109,16 +111,28 @@ def game_list(request):
     
     return render(request, 'game_list.html', {"page_obj": page_obj})
 
+@csrf_exempt  # Use this only for testing; consider using CSRF tokens in production
 def profile_view(request):
-    profile = request.user.profile  # Assuming you have a Profile model linked to User
-    user_games = GameStatus.objects.filter(user=request.user).select_related('game')  # Fetch user's games
+    profile = Profile.objects.get(user=request.user)  # Assuming you have a user field in your Profile model
+    user_games = GameStatus.objects.filter(user=request.user).select_related('game')
+    if request.method == 'POST':
+        if 'profile_picture' in request.POST:
+            profile_picture_form = ProfilePictureForm(request.POST, request.FILES, instance=profile)
+            if profile_picture_form.is_valid():
+                profile_picture_form.save()
+                return JsonResponse({'success': True, 'profile_picture_url': profile.profile_picture.url})
+        elif 'header_image' in request.POST:
+            header_image_form = HeaderImageForm(request.POST, request.FILES, instance=profile)
+            if header_image_form.is_valid():
+                header_image_form.save()
+                return JsonResponse({'success': True, 'header_image_url': profile.header_image.url})
+        elif 'biography' in request.POST:
+            biography_form = BiographyForm(request.POST, instance=profile)
+            if biography_form.is_valid():
+                biography_form.save()
+                return JsonResponse({'success': True, 'biography': profile.biography})
 
-    context = {
-        'profile': profile,
-        'user_games': user_games,
-    }
-    print(user_games)  # This will print the queryset to the console
-    return render(request, 'members/profile.html', context)
+    return render(request, 'profile.html', {'profile': profile, 'user_games': user_games})
 
 async def fetch_all_igdb_games_sync(total_games=500):
     """ Helper function to run the async function in a sync context. """
@@ -180,13 +194,6 @@ def search_games(request):
         }
         return render(request, 'members/search_results.html', context)
 
-from django.shortcuts import render, get_object_or_404
-
-# members/views.py
-
-from django.shortcuts import render, get_object_or_404
-from members.models import Game
-
 def game_detail(request, game_id):
     game = get_object_or_404(Game, id=game_id)
     screenshots = game.game_screenshots.all()  # Fetch all screenshots related to the game
@@ -212,13 +219,6 @@ def platform_games(request, platform):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'members/platform_games.html', {'page_obj': page_obj, 'platform': platform})
-
-# members/views.py
-from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import ReviewsFixedForm
-from .models import ReviewsFixed, Game
-from django.contrib.auth.decorators import login_required
 
 @login_required
 def submit_review(request):
