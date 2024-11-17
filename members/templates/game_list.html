@@ -1,51 +1,84 @@
-{% extends "navbar.html" %}
+{% include "navbar.html" %}
 {% load static %}
-{% block content %}
-    <h1>Games</h1>
-    <a href="{% url 'game_list' %}?sort=abc">A-Z Order</a>
-    {% if page_obj.object_list %}
-    {% for game in page_obj %}
-    <div>
-        <h2>
-            <a href="{% url 'game_detail' game.id %}">{{ game.name }}</a>
-        </h2>
-        {% if game.cover_url %}
-            <a href="{% url 'game_detail' game.id %}">
-                <img src="{{ game.cover_url }}">
-            </a>
-        {% else %}
-            <a href="{% url 'game_detail' game.id %}">
-                <p><img src="{% static 'assets/noimage.jpg' %}" style="width: 100px; height: 100px;" alt="No Image Available"></p>
-            </a>
+
+<style>
+
+.tooltip {
+    visibility: hidden; /* Hidden by default */
+    width: 120px; /* Width of the tooltip */
+    background-color: black; /* Background color */
+    color: #fff; /* Text color */
+    text-align: center; /* Center text */
+    border-radius: 5px; /* Rounded corners */
+    padding: 5px; /* Padding */
+    position: absolute; /* Positioning */
+    z-index: 1; /* Ensure it appears above other elements */
+    bottom: 100%; /* Position above the game item */
+    left: 50%; /* Center horizontally */
+    margin-left: -60px; /* Adjust to center */
+    opacity: 0; /* Start as invisible */
+    transition: opacity 0.3s; /* Fade effect */
+}
+.flex-container {
+    display: flex;
+    flex-direction: row; /* Ensure items are in a row */
+    flex-wrap: wrap; /* Allow items to wrap to the next line */
+    justify-content: space-around; /* Space items evenly */
+}
+.game-item:hover .tooltip {
+    visibility: visible; /* Show tooltip on hover */
+    opacity: 1; /* Fade in */
+}
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+</style>
+
+<body class="bg-gray-500">
+        {% block content %}
+            <h1>Games</h1>
+            <a href="{% url 'game_list' %}?sort=abc">A-Z Order</a>
+            <div class="flex-container clearfix"> <!-- Add clearfix class -->
+            {% if page_obj.object_list %}
+                {% for game in page_obj %}
+                    {% if game.cover_url %} <!-- Check if cover_url exists -->
+                    <div class="game-item">
+                        <a href="{% url 'game_detail' game.id %}">
+                            <img src="{{ game.cover_url }}" style="width: 100px; height: 100px;">
+                        </a>
+                        <div class="tooltip">{{ game.name }}</div> <!-- Tooltip with game name -->
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+                <p>No games available.</p>
+            {% endif %}
+    
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        {% for i in page_obj.paginator.page_range %}
+            {% if page_obj.number == i %}
+                <span class="current">{{ i }}</span>
+            {% else %}
+                <a href="?page={{ i }}">{{ i }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
         {% endif %}
     </div>
-{% endfor %}
-    {% else %}
-        <p>No games available.</p>
-    {% endif %}
-    
-    <!-- Pagination Controls -->
-    {% if page_obj.has_other_pages %}
-        <div class="pagination">
-            {% if page_obj.has_previous %}
-                <a href="?page=1">&laquo; first</a>
-                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-            {% endif %}
+{% endif %}
 
-            {% for i in page_obj.paginator.page_range %}
-                {% if page_obj.number == i %}
-                    <span class="current">{{ i }}</span>
-                {% else %}
-                    <a href="?page={{ i }}">{{ i }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}">next</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-            {% endif %}
-        </div>
-    {% endif %}
-
-    <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+<p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
 {% endblock %}
+</body>

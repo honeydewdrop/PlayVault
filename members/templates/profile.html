@@ -1,4 +1,4 @@
-{% extends 'navbar.html' %}
+{% include "navbar.html" %}
 
 {% block content %}
     <h1>Welcome, {{ user.username }}!</h1>
@@ -47,4 +47,17 @@
             {% endfor %}
         </ul>
     {% endif %}
+
+<h2> My Games </h2>
+    {% if user_games %}
+    <ul>
+        {% for game_status in user_games %}
+            <li>
+                <a href="{% url 'game_detail' game_status.game.id %}">{{ game_status.game.name }}</a> - Status: {{ game_status.status }}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You have no saved games.</p>
+{% endif %}
 {% endblock %}

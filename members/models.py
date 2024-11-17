@@ -82,16 +82,35 @@ class ReviewsFixed(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.game.name}"
-    
-class NewReviewsFixed(models.Model):
-       game = models.ForeignKey('Game', related_name='new_reviews', on_delete=models.CASCADE)
-       user = models.ForeignKey(User, on_delete=models.CASCADE)
-       reviewtext = models.TextField()
-       rating = models.PositiveSmallIntegerField(
-           default=1,
-           validators=[MinValueValidator(1), MaxValueValidator(5)]
-       )
-       created_at = models.DateTimeField(default=timezone.now)
 
-       def __str__(self):
-           return f"{self.user.username} - {self.game.name}"
+class GameStatus(models.Model):
+    STATUS_CHOICES = [
+        ('planning', 'Planning'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('dropped', 'Dropped'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)  # Link to the game
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)  # Status of the game
+    updated_at = models.DateTimeField(auto_now=True)  # Track when the status was last updated
+
+    class Meta:
+        unique_together = ('user', 'game')  # Ensure a user can only have one status per game
+
+    def __str__(self):
+        return f"{self.user.username} - {self.game.name}: {self.status}"
+    
+# class NewReviewsFixed(models.Model):
+#        game = models.ForeignKey('Game', related_name='new_reviews', on_delete=models.CASCADE)
+#        user = models.ForeignKey(User, on_delete=models.CASCADE)
+#        reviewtext = models.TextField()
+#        rating = models.PositiveSmallIntegerField(
+#            default=1,
+#            validators=[MinValueValidator(1), MaxValueValidator(5)]
+#        )
+#        created_at = models.DateTimeField(default=timezone.now)
+
+#        def __str__(self):
+#            return f"{self.user.username} - {self.game.name}"

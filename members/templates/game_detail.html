@@ -1,118 +1,144 @@
-<style>
-    .header-image {
-        width: 110%;
-        height: auto; /* Maintain aspect ratio */
-    }
-</style>
-
 {% extends "navbar.html" %}
 {% block title %}Game Detail - {{ game.name }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-t from-black to-red-500 p-6">
-    {% if header_image %} <!-- Check for header_image instead -->
-    <div class="mb-6">
-        <img src="{{ header_image }}" alt="{{ game.name }} Screenshot" class="header-image object-cover shadow-lg mb-4"> <!-- Use header_image -->
+<div class="bg-gray-500 min-h-screen p-4"> <!-- Set background color and minimum height -->
+    {% if header_image %}
+    <div class="header-container"> <!-- Container for header image and title -->
+        <img src="{{ header_image }}" alt="{{ game.name }} Screenshot" class="header-image object-cover shadow-lg mb-4">
+        <h1 class="title">{{ game.name }}</h1> <!-- Title text -->
     </div>
-{% endif %}
-    <h1 class="text-4xl font-bold text-black mb-4">{{ game.name }}</h1>
+    {% endif %}
     <p class="sub-title text-black">Released on {{ game.release_date }}</p>
 
-    <div class="flex flex-col md:flex-row">
-        {% if game.cover_url %}
-            <div class="mb-6 md:mr-6">
-                <img src="{{ game.cover_url }}" alt="{{ game.name }}" class="rounded-lg h-64 w-56 object-cover shadow-lg">
-            </div>
-        {% endif %}
-
-        <div class="bg-white rounded-lg shadow-md p-6 flex-1">
-            <div class="flex flex-col md:flex-row md:space-x-4">
-                <div class="flex-1">
-                    <p class="sub-title">by <a href="/company/{{ game.company_slug }}" class="text-blue-500">{{ game.company }}</a></p>
-                    <p class="text-gray-700">{{ game.description }}</p>
-                </div>
-                <div class="flex-1">
-                    <p class="text-gray-700"><strong>Genre:</strong> {{ game.genre }}</p>
-                    <p class="text-gray-700"><strong>Platforms:</strong> {{ game.platforms }}</p>
-                </div>
-            </div>
-            <p class="text-gray-700"><strong>Companies:</strong> {{ game.companies }}</p>
+    {% if game.cover_url %}
+        <div class="mb-6 md:mr-6 bg-gray-200">
+            <img src="{{ game.cover_url }}" alt="{{ game.name }}" class="rounded-lg h-64 w-56 object-cover shadow-lg">
         </div>
+    {% endif %}
+    <div class="flex-1">
+        <p class="sub-title">by <a href="/company/{{ game.company_slug }}" class="text-blue-500">{{ game.company }}</a></p>
+        <p class="text-gray-700">{{ game.description }}</p>
     </div>
+    <div class="flex-1">
+        <p class="text-gray-700"><strong>Genre:</strong> {{ game.genre }}</p>
+        <p class="text-gray-700"><strong>Platforms:</strong> {{ game.platforms }}</p>
+    </div>
+    <p class="text-gray-700"><strong>Companies:</strong> {{ game.companies }}</p>
 
-    <div class="mt-6">
-        <h2 class="text-2xl font-semibold mb-2 text-black">User Reviews</h2>
-        <div id="reviews-container">
-            {% if reviews %}
-                {% for review in reviews %}
-                    <div class="border-b mb-2 pb-2">
-                        <p class="text-gray-700"><strong>{{ review.user.username }}:</strong> {{ review.reviewtext }} (Rating: {{ review.rating }})</p>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p class="text-black">No reviews yet.</p>
-            {% endif %}
-        </div>
-        <a href="/games/{{ game.id }}/reviews/" class="text-blue-500">See all reviews</a>
-    </div>
+    <h2 class="text-2xl font-semibold mb-2 text-black">User Reviews</h2>
+    {% if reviews %}
+        {% for review in reviews %}
+            <div class="border-b mb-2 pb-2">
+                <p class="text-gray-700"><strong>{{ review.user.username }}:</strong> {{ review.reviewtext }} (Rating: {{ review.rating }})</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-black">No reviews yet.</p>
+    {% endif %}
+    <a href="/games/{{ game.id }}/reviews/" class="text-blue-500">See all reviews</a>
 
-    <div class="mt-6">
-        <h2 class="text-2xl font-semibold mb-2 text-black">Submit a Review</h2>
-        <form id="review-form">
-            {% csrf_token %}
-            <div class="mb-4">
-                <label for="reviewtext" class="block text-gray-700">Review Text:</label>
-                <textarea id="reviewtext" name="reviewtext" rows="4" class="border rounded w-full p-2" required></textarea>
-            </div>
-            <div class="mb-4">
-                <label for="rating" class="block text-gray-700">Rating:</label>
-                <select id="rating" name="rating" class="border rounded w-full p-2" required>
-                    <option value="" disabled selected>Select a rating</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </div>
-            <input type="hidden" name="game_id" value="{{ game.id }}">
-            <button type="submit" class="bg-blue-500 text-black rounded px-4 py-2">Submit Review</button>
-        </form>
-    </div>
+    <h2 class="text-2xl font-semibold mb-2 text-black">Submit a Review</h2>
+    <form id="review-form">
+        {% csrf_token %}
+        <label for="reviewtext" class="block text-gray-700">Review Text:</label>
+        <textarea id="reviewtext" name="reviewtext" rows="4" class="border rounded w-full p-2" required></textarea>
+        <label for="rating" class="block text-gray-700">Rating:</label>
+        <select id="rating" name="rating" class="border rounded w-full p-2" required>
+            <option value="" disabled selected>Select a rating</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <input type="hidden" name="game_id" value="{{ game.id }}">
+        <button type="submit" class="bg-blue-500 text-black rounded px-4 py-2">Submit Review</button>
+    </form>
+
+    <h2>Update Game Status</h2>
+    <form id="status-form" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="game_id" value="{{ game.id }}">
+        <label for="status">Select Game Status:</label>
+        <select name="status" id="status" required>
+            <option value="">Select a status</option>
+            <option value="planning">Planning</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="dropped">Dropped</option>
+        </select>
+        <button type="submit">Submit Status</button>
+    </form>
+
+    <div id="status-message" class="mt-4"></div> <!-- Placeholder for status messages -->
 </div>
 
 <script>
     document.getElementById('review-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the default form submission
-
-        const formData = new FormData(this); // Create a FormData object from the form
-
-        fetch("{% url 'submit_review' %}", {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest' // Indicate that this is an AJAX request
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json(); // Parse the JSON response
-        })
-        .then(data => {
-            // Append the new review to the reviews container
-            const reviewsContainer = document.getElementById('reviews-container');
-            const newReview = document.createElement('div');
-            newReview.classList.add('border-b', 'mb-2', 'pb-2');
-            newReview.innerHTML = `<p class="text-gray-700"><strong>${data.username}:</strong> ${data.reviewtext} (Rating: ${data.rating})</p>`;
-            reviewsContainer.prepend(newReview); // Add the new review at the top
-            document.getElementById('reviewtext').value = ''; // Clear the textarea
-            document.getElementById('rating').value = ''; // Reset the rating
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
+            event.preventDefault(); // Prevent the default form submission
+    
+            const formData = new FormData(this); // Create a FormData object from the form
+    
+            fetch("{% url 'submit_review' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Indicate that this is an AJAX request
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Parse the JSON response
+            })
+            .then(data => {
+                // Append the new review to the reviews container
+                const reviewsContainer = document.getElementById('reviews-container');
+                const newReview = document.createElement('div');
+                newReview.classList.add('border-b', 'mb-2', 'pb-2');
+                newReview.innerHTML = `<p class="text-gray-700"><strong>${data.username}:</strong> ${data.reviewtext} (Rating: ${data.rating})</p>`;
+                reviewsContainer.prepend(newReview); // Add the new review at the top
+                document.getElementById('reviewtext').value = ''; // Clear the textarea
+                document.getElementById('rating').value = ''; // Reset the rating
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
         });
-    });
+    
+        document.getElementById('status-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+    
+            const formData = new FormData(this); // Create a FormData object from the form
+    
+            fetch("{% url 'progress_view' %}", { // Use the URL for your view
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Indicate that this is an AJAX request
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); // Parse the JSON response
+            })
+            .then(data => {
+                // Display success message
+                document.getElementById('status-message').innerHTML = `<p>Status updated to: ${data.status}</p>`;
+                
+                // Set the dropdown to the selected value
+                const statusDropdown = document.getElementById('status');
+                statusDropdown.value = data.status; // Assuming data.status contains the selected status
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                document.getElementById('status-message').innerHTML = `<p>Error updating status: ${error.message}</p>`;
+            });
+        });
 </script>
 {% endblock %}
+        

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile
+from .models import Profile, ReviewsFixed, GameStatus
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=65)
@@ -18,9 +18,6 @@ class ProfileForm(forms.ModelForm):
         model = Profile
         fields = ['profile_picture', 'header_image', 'biography']
 
-from django import forms
-from .models import ReviewsFixed
-
 class ReviewsFixedForm(forms.ModelForm):
     class Meta:
         model = ReviewsFixed
@@ -34,3 +31,8 @@ class ReviewsFixedForm(forms.ModelForm):
             'reviewtext': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
             'rating': forms.Select(choices=[(i, i) for i in range(1, 6)]),
         }
+
+class StatusForm(forms.ModelForm):
+    class Meta:
+        model = GameStatus
+        fields = ['status']

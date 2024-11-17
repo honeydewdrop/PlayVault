@@ -4,9 +4,9 @@ from django.contrib.auth import login as auth_login, authenticate
 from django.contrib.auth import logout
 from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
-from .forms import ProfileForm, ReviewsFixedForm
+from .forms import ProfileForm, ReviewsFixedForm, StatusForm
 from django.db import connection
-from members.models import Profile, ReviewsFixed
+from members.models import Profile, GameStatus
 from .utils import fetch_all_igdb_games #sam
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import logging
@@ -110,18 +110,15 @@ def game_list(request):
     return render(request, 'game_list.html', {"page_obj": page_obj})
 
 def profile_view(request):
-    profile, created = Profile.objects.get_or_create(user=request.user)
+    profile = request.user.profile  # Assuming you have a Profile model linked to User
+    user_games = GameStatus.objects.filter(user=request.user).select_related('game')  # Fetch user's games
 
-    if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully!')
-            return redirect('profile')  # Redirect to the same profile page or another page
-    else:
-        form = ProfileForm(instance=profile)
-
-    return render(request, 'members/profile.html', {'form': form, 'profile': profile})
+    context = {
+        'profile': profile,
+        'user_games': user_games,
+    }
+    print(user_games)  # This will print the queryset to the console
+    return render(request, 'members/profile.html', context)
 
 async def fetch_all_igdb_games_sync(total_games=500):
     """ Helper function to run the async function in a sync context. """
@@ -247,3 +244,20 @@ def submit_review(request):
                print("Form errors:", form.errors)  # Print form errors for debugging
                return JsonResponse({'error': 'Invalid form submission', 'details': form.errors}, status=400)
        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required
+def progress_view(request):
+    if request.method == 'POST':
+        form = StatusForm(request.POST)
+        if form.is_valid():
+            game_status = form.save(commit=False)
+            game_status.user = request.user  # Set the current user
+            game_status.game = get_object_or_404(Game, id=request.POST.get('game_id'))
+            game_status.save()
+            return JsonResponse({
+                'status': game_status.status,  # Return the selected status
+                'message': 'Status updated successfully',
+            })
+        else:
+            return JsonResponse({'error': 'Invalid form submission', 'details': form.errors}, status=400)
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

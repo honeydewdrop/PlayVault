@@ -9,8 +9,8 @@
         /* Styling for the navbar */
         .navbar {
             padding: 1.5rem 0;
-            background-color: transparent; /* Translucent background */
-            border-bottom: 4px solid ; /* Purple line at the bottom */
+            background: 
+            linear-gradient(to right, gray 40%, #000000 50%);
         }
         .navbar-brand {
             font-size: 1.8em;
@@ -22,10 +22,14 @@
             font-size: 1.2em;
             margin-left: auto; /* Align to the left */
         }
+
+        .nav-item .nav-link {
+            color: red !important;
+        }
+
         .navbar-dark .navbar-nav .nav-link:hover {
             color: black;
         }
-
         /* Custom styling for search bar and button */
         .search-bar {
             max-width: 400px;
@@ -97,7 +101,7 @@
         </div>  
     </nav>
 
-    <div class="container mt-4">
+    <div class="w-full">
         {% block content %}
         {% endblock %}
     </div>
