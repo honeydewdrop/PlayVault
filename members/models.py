@@ -70,6 +70,9 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
     
+class UpdateProfile(models.Model):
+    biography = models.TextField(max_length=500, blank=True)
+    
 class ReviewsFixed(models.Model):
     game = models.ForeignKey('Game', related_name='reviews', on_delete=models.CASCADE)  # Ensure Game model is defined
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -79,6 +82,9 @@ class ReviewsFixed(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(5)]
     )  # Enforce rating range from 1 to 5
     created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ('user', 'game')
 
     def __str__(self):
         return f"{self.user.username} - {self.game.name}"

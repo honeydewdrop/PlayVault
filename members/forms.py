@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile, ReviewsFixed, GameStatus
+from .models import *
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=65)
@@ -25,8 +25,8 @@ class HeaderImageForm(forms.ModelForm):
 
 class BiographyForm(forms.ModelForm):
     class Meta:
-        model = Profile
-        fields = ['biography']
+        model = UpdateProfile
+        fields = "__all__"
 
 class ReviewsFixedForm(forms.ModelForm):
     class Meta:

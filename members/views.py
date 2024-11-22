@@ -7,7 +7,7 @@ from .forms import LoginForm, RegisterForm
 from django.contrib.auth.decorators import login_required
 from .forms import ProfilePictureForm, HeaderImageForm, BiographyForm, ReviewsFixedForm, StatusForm
 from django.db import connection
-from members.models import Profile, GameStatus
+from members.models import Profile, GameStatus, ReviewsFixed
 from .utils import fetch_all_igdb_games #sam
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import logging
@@ -113,26 +113,36 @@ def game_list(request):
 
 @csrf_exempt  # Use this only for testing; consider using CSRF tokens in production
 def profile_view(request):
-    profile = Profile.objects.get(user=request.user)  # Assuming you have a user field in your Profile model
+    profile = Profile.objects.get(user=request.user)
     user_games = GameStatus.objects.filter(user=request.user).select_related('game')
+    user_reviews = ReviewsFixed.objects.filter(user=request.user).select_related('game')
+
     if request.method == 'POST':
         if 'profile_picture' in request.POST:
             profile_picture_form = ProfilePictureForm(request.POST, request.FILES, instance=profile)
             if profile_picture_form.is_valid():
                 profile_picture_form.save()
                 return JsonResponse({'success': True, 'profile_picture_url': profile.profile_picture.url})
+            else:
+                return JsonResponse({'success': False, 'errors': profile_picture_form.errors})
+
         elif 'header_image' in request.POST:
             header_image_form = HeaderImageForm(request.POST, request.FILES, instance=profile)
             if header_image_form.is_valid():
                 header_image_form.save()
                 return JsonResponse({'success': True, 'header_image_url': profile.header_image.url})
-        elif 'biography' in request.POST:
+            else:
+                return JsonResponse({'success': False, 'errors': header_image_form.errors})
+
+        elif 'biography_form' in request.POST:
             biography_form = BiographyForm(request.POST, instance=profile)
             if biography_form.is_valid():
                 biography_form.save()
-                return JsonResponse({'success': True, 'biography': profile.biography})
+                return JsonResponse({'success': True, 'biography_form': profile.biography})
+            else:
+                return JsonResponse({'success': False, 'errors': biography_form.errors})
 
-    return render(request, 'profile.html', {'profile': profile, 'user_games': user_games})
+    return render(request, 'profile.html', {'profile': profile, 'user_games': user_games, 'user_reviews': user_reviews})
 
 async def fetch_all_igdb_games_sync(total_games=500):
     """ Helper function to run the async function in a sync context. """
@@ -261,3 +271,8 @@ def progress_view(request):
         else:
             return JsonResponse({'error': 'Invalid form submission', 'details': form.errors}, status=400)
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+@login_required
+def my_reviews_view(request):
+    user_reviews = ReviewsFixed.objects.filter(user=request.user)  # Replace `Review` with your model name
+    return render(request, 'members/profile.html', {'reviews': user_reviews})
