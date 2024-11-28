@@ -4,9 +4,21 @@ from django.db import transaction
 from members.models import Game
 from members.utils import fetch_all_igdb_games
 import datetime
+from requests import post
 
 class Command(BaseCommand):
     help = 'Fetches all games from IGDB API and stores them in the database'
+
+    def handle(self, *args, **options):
+        response = post(
+            'https://api.igdb.com/v4/companies',
+            headers = {
+        'Client-ID': '5fx0c2tdp25zr3fuazhlqmwvezok4f',
+        'Authorization': 'Bearer 9xs6a5rq9q9i37q84ca5w82uasrwt9',
+            },
+            data='fields change_date,change_date_category,changed_company_id,checksum,country,created_at,description,developed,logo,name,parent,published,slug,start_date,start_date_category,updated_at,url,websites;'
+        )
+
 
     def handle(self, *args, **options):
         asyncio.run(self.async_handle(*args, **options))

@@ -20,36 +20,65 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
-
-class Company(models.Model):
-    name = models.CharField(max_length=10000, blank=True, null=True)  # Changed to CharField with max_length
-    description = models.TextField(blank=True, null=True)
-    country = models.IntegerField(blank=True, null=True)  # ISO 3166-1 country code
-    logo = models.URLField(blank=True, null=True)  # URL for the company logo
-    url = models.URLField(blank=True, null=True)  # Official website URL
-    created_at = models.DateTimeField(blank=True, null=True)  # Date added to IGDB
-    updated_at = models.DateTimeField(blank=True, null=True)  # Last updated date
-    slug = models.SlugField(max_length=10000, unique=True)  # Ensure slug has a max_length
-
-    def __str__(self):
-        return self.name if self.name else "Unnamed Company"
     
 class Game(models.Model):
     igdb_id = models.IntegerField(unique=True)
-    name = models.TextField()  # Changed to TextField
-    cover_url = models.TextField(null=True, blank=True)  # Changed to TextField
+    name = models.TextField()  
+    cover_url = models.TextField(null=True, blank=True)  
     genre = models.TextField(null=True, blank=True)
     platforms = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     release_date = models.DateField(null=True, blank=True)
     rating = models.FloatField(null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True)
-    companies = models.ManyToManyField(Company, blank=True)  # Change to ManyToManyField
+    companies = models.ManyToManyField('Company', related_name='games', blank=True)  # Many-to-many relationship
     age_ratings = models.JSONField(default=list, blank=True)
     screenshots = models.JSONField(default=list, blank=True)
 
+class Company(models.Model):
+    name = models.CharField(max_length=10000, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    country = models.IntegerField(blank=True, null=True)  # ISO 3166-1 country code
+    logo = models.URLField(blank=True, null=True)
+    url = models.URLField(blank=True, null=True)  
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    slug = models.SlugField(max_length=10000, unique=True)  
+    
+    def __str__(self):
+        return self.name if self.name else "Unnamed Company"
+
+
     def __str__(self):
         return self.name
+
+class InvolvedCompany(models.Model):
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='involved_companies')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    developer = models.BooleanField(default=False)
+    publisher = models.BooleanField(default=False)
+    porting = models.BooleanField(default=False)
+    supporting = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('game', 'company')  # Ensure each game-company pair is unique
+
+    def __str__(self):
+        return f"{self.company.name} - {self.get_role_display()} for {self.game.name}"
+
+    def get_role_display(self):
+        roles = []
+        if self.developer:
+            roles.append('Developer')
+        if self.publisher:
+            roles.append('Publisher')
+        if self.porting:
+            roles.append('Porting')
+        if self.supporting:
+            roles.append('Supporting')
+        return ', '.join(roles)
     
 class Screenshot(models.Model):
     game = models.ForeignKey(Game, related_name='game_screenshots', on_delete=models.CASCADE)  # Change related_name here

@@ -208,11 +208,12 @@ def game_detail(request, game_id):
     game = get_object_or_404(Game, id=game_id)
     screenshots = game.game_screenshots.all()  # Fetch all screenshots related to the game
     header_image = screenshots.first().url if screenshots.exists() else None  # Get the first screenshot URL for the header
-
+    companies = game.companies.all()
     context = {
         'game': game,
         'screenshots': screenshots,  # Pass all screenshots to the template
         'header_image': header_image,  # Pass the header image to the template
+        'company': companies
     }
     return render(request, 'game_detail.html', context)
 
