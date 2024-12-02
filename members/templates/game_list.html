@@ -3,52 +3,76 @@
 
 <style>
 
-.tooltip {
-    visibility: hidden; /* Hidden by default */
-    width: 120px; /* Width of the tooltip */
-    background-color: black; /* Background color */
-    color: #fff; /* Text color */
-    text-align: center; /* Center text */
-    border-radius: 5px; /* Rounded corners */
-    padding: 5px; /* Padding */
-    position: absolute; /* Positioning */
-    z-index: 1; /* Ensure it appears above other elements */
-    bottom: 100%; /* Position above the game item */
-    left: 50%; /* Center horizontally */
-    margin-left: -60px; /* Adjust to center */
-    opacity: 0; /* Start as invisible */
-    transition: opacity 0.3s; /* Fade effect */
+    body {
+        background-color: black;
+    }
+    
+    .dots {
+    margin: 0 5px; /* Adds horizontal space between the dots and the page numbers */
+    font-size: 20px; /* Optional: adjust the size of the dots */
 }
-.flex-container {
-    display: flex;
-    flex-direction: row; /* Ensure items are in a row */
-    flex-wrap: wrap; /* Allow items to wrap to the next line */
-    justify-content: space-around; /* Space items evenly */
-}
-.game-item:hover .tooltip {
-    visibility: visible; /* Show tooltip on hover */
-    opacity: 1; /* Fade in */
-}
-.clearfix::after {
-    content: "";
-    clear: both;
-    display: table;
-}
-</style>
 
-<body class="bg-gray-500">
+    .flex-container {
+        display: flex;
+        flex-direction: row; /* Ensure items are in a row */
+        flex-wrap: wrap; /* Allow items to wrap to the next line */
+        gap: 20px;
+        margin-left: 40px;
+    }
+    
+    .game-item {
+        position: relative; /* Required for the overlay */
+        width: 100px;
+        height: 170px;
+    }
+    
+    .game-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s; /* Smooth transition for opacity */
+    }
+    
+    .game-item .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Gray transparent overlay */
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0; /* Hidden by default */
+        transition: opacity 0.3s; /* Smooth fade-in */
+        text-align: center; /* Center text */
+        border-radius: 5px;
+    }
+    
+    .game-item:hover img {
+        opacity: 0.5; /* Make the cover semi-transparent */
+    }
+    
+    .game-item:hover .overlay {
+        opacity: 1; /* Show the overlay on hover */
+    }
+    </style>
+    
+    <div>
         {% block content %}
-            <h1>Games</h1>
-            <a href="{% url 'game_list' %}?sort=abc">A-Z Order</a>
+            <h1 class="text-white text-center pt-24">Games</h1>
+            <a href="{% url 'game_list' %}?sort=abc" style="margin-left: 40px">A-Z Order</a>
+            <a href="{% url 'game_list' %}?sort=rating" style="margin-left: 45px">Rating Order</a>
             <div class="flex-container clearfix"> <!-- Add clearfix class -->
             {% if page_obj.object_list %}
                 {% for game in page_obj %}
                     {% if game.cover_url %} <!-- Check if cover_url exists -->
                     <div class="game-item">
                         <a href="{% url 'game_detail' game.id %}">
-                            <img src="{{ game.cover_url }}" style="width: 100px; height: 100px;">
+                            <img src="{{ game.cover_url }}" alt="{{ game.name }}">
+                            <div class="overlay">{{ game.name }}</div> <!-- Overlay with game name -->
                         </a>
-                        <div class="tooltip">{{ game.name }}</div> <!-- Tooltip with game name -->
                     </div>
                     {% endif %}
                 {% endfor %}
@@ -57,28 +81,46 @@
                 <p>No games available.</p>
             {% endif %}
     
-    {% if page_obj.has_other_pages %}
-    <div class="pagination">
-        {% if page_obj.has_previous %}
-            <a href="?page=1">&laquo; first</a>
-            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% if page_obj.has_other_pages %}
+            <div class="pagination" style="justify-content: center; align-items: center; gap: 10px; color:white; font-size: 24px; padding-top: 5px">
+                <!-- "First" and "Previous" buttons -->
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+        
+                <!-- Pages Logic: Show 1, current page, last page, and nearby pages -->
+                {% for i in page_obj.paginator.page_range %}
+                    {% if i == 1 or i == page_obj.paginator.num_pages %}
+                        <!-- Show first and last page -->
+                        {% if page_obj.number == i %}
+                            <span class="current">{{ i }}</span> <!-- Current page, no link -->
+                        {% else %}
+                            <a href="?page={{ i }}">{{ i }}</a> <!-- Other pages, linkable -->
+                        {% endif %}
+                    {% elif i >= page_obj.number|add:-2 and i <= page_obj.number|add:2 %}
+                        <!-- Show current page range -->
+                        {% if page_obj.number == i %}
+                            <span class="current">{{ i }}</span> <!-- Current page -->
+                        {% else %}
+                            <a href="?page={{ i }}">{{ i }}</a> <!-- Other pages -->
+                        {% endif %}
+                    {% elif i == page_obj.number|add:-3 or i == page_obj.number|add:3 %}
+                        <span class="dots"> ... </span> <!-- Ellipsis when skipping pages -->
+                    {% endif %}
+                {% endfor %}
+        
+                <!-- "Next" and "Last" buttons -->
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+            </div>
         {% endif %}
-
-        {% for i in page_obj.paginator.page_range %}
-            {% if page_obj.number == i %}
-                <span class="current">{{ i }}</span>
-            {% else %}
-                <a href="?page={{ i }}">{{ i }}</a>
-            {% endif %}
-        {% endfor %}
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">next</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-        {% endif %}
+        
+        {% endblock %}
+        
+        <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+        
     </div>
-{% endif %}
-
-<p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
-{% endblock %}
-</body>
+    

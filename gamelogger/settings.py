@@ -28,9 +28,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0431-38-111-224-118.ngrok-free.app', '127.0.0.1']
 
+STATIC_URL = '/static/'
+
+# Add this if you have additional directories for static files
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR, 'members/static'),
 ]
+
+# If you're in production, make sure you collect static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 # Application definition
 

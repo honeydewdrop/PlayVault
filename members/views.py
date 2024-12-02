@@ -71,45 +71,52 @@ def home(request):
         'recent_games': recent_games,
     }
 
+from django.core.paginator import Paginator, EmptyPage
+from django.shortcuts import render
+import logging
+
+logger = logging.getLogger(__name__)
+
 def game_list(request):
     logger.info("Entering game_list view")
-    
+
     # Check for sort parameter
     sort_order = request.GET.get("sort")
-    
-    # Count total games in the database
-    if sort_order == 'abc':
-        total_games = Game.objects.all().order_by('name')[:1000]  # Sort alphabetically
-    else:
-        total_games = Game.objects.all()[:1000]  # Default order
-    
-    logger.info(f"Total games in database: {total_games}")
+    queryset = Game.objects.all()
 
-    # Set up pagination
-    paginator = Paginator(total_games, 100)
+    # Filter out games with no cover image
+    queryset = queryset.exclude(cover_url__isnull=True).exclude(cover_url='')
+
+    # Apply sorting based on the parameter
+    if sort_order == 'abc':
+        queryset = queryset.order_by('name')  # Sort alphabetically
+    elif sort_order == 'rating':
+        queryset = queryset.filter(rating__isnull=False).order_by('-rating')
+
+    games_count = queryset.count()
+
+    # Set up pagination with 24 games per page
+    paginator = Paginator(queryset, 48)  # 24 games per page
     page_number = request.GET.get("page")
 
-    for game in total_games:
-       print(game.name)
-    
     try:
-        page_obj = paginator.page(page_number)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        page_obj = paginator.page(1)
+        # Get the page object based on the page number from the URL
+        page_obj = paginator.get_page(page_number)
     except EmptyPage:
-        # If page is out of range, deliver last page of results.
-        page_obj = paginator.page(paginator.num_pages)
+        # In case the page number is invalid, load the last page
+        page_obj = paginator.get_page(paginator.num_pages)
 
-    # Prepare context for the template
+    # Log page information
+    logger.info(f"Displaying page {page_number} of {paginator.num_pages}, showing {len(page_obj)} games.")
+
+    # Context for template
     context = {
         "page_obj": page_obj,
-        "total_games": total_games,
-        "games_count": total_games.count(),
-        "games_per_page": 100,
+        "games_count": games_count,
+        "games_per_page": 48,  # Display 24 games per page
     }
-    
-    return render(request, 'game_list.html', {"page_obj": page_obj})
+
+    return render(request, "game_list.html", context)
 
 @csrf_exempt  # Use this only for testing; consider using CSRF tokens in production
 def profile_view(request):
@@ -209,11 +216,13 @@ def game_detail(request, game_id):
     screenshots = game.game_screenshots.all()  # Fetch all screenshots related to the game
     header_image = screenshots.first().url if screenshots.exists() else None  # Get the first screenshot URL for the header
     companies = game.companies.all()
+    reviews = game.reviews.all()
     context = {
         'game': game,
         'screenshots': screenshots,  # Pass all screenshots to the template
         'header_image': header_image,  # Pass the header image to the template
-        'company': companies
+        'company': companies,
+        'reviews': reviews
     }
     return render(request, 'game_detail.html', context)
 
