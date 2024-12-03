@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .utils import fetch_all_igdb_games #sam
 from django.core.paginator import Paginator
 import logging
+from members.models import Game
 from asgiref.sync import sync_to_async
 logger = logging.getLogger(__name__)
 
@@ -30,10 +31,14 @@ def logout_view(request):
     return redirect('home')  # Redirect to the home page or another page if GET
 
 def home(request):
+    print("Home view has been triggered!")
+    handpicked_game_ids = [10399, 136380, 33427, 186638, 131046, 109323]
+    trending_games = Game.objects.filter(id__in=handpicked_game_ids)
+    print(f"Trending games: {trending_games}")
     context = {
-        'greeting': 'Welcome to the Home Page!',
-        'user_count': 42,  # Example static data
+        'trending_games': trending_games,  # Pass handpicked games to template
     }
+
     return render(request, 'home.html', context)
 
 def login_view(request):

@@ -1,10 +1,25 @@
 {% include 'navbar.html' %}
 {% block content %}
+<style>
+    body {
+        background-color: #1c1a1a;
+        color: white;
+        }
+    .container {
+        margin-top: 250px;
+        margin-left: 650px;
+        background-color:slategrey;
+        width: 250px;
+        height: 240px;
+    }
+</style>
+<div class="container">
 <form method="POST">
     {% csrf_token %}
     <h2>Login</h2>
     {{ form.as_p }}
     <button type="submit">Login</button>
 </form>
+</div>
 
 {% endblock content %}

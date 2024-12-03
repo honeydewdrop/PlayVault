@@ -32,7 +32,7 @@ STATIC_URL = '/static/'
 
 # Add this if you have additional directories for static files
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'members/static'),
+    os.path.join(BASE_DIR, 'static'),
 ]
 
 # If you're in production, make sure you collect static files

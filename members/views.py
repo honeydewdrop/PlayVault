@@ -28,6 +28,23 @@ def logout_view(request):
         return redirect('home')  # Redirect to the home page or another page
     return redirect('home')  # Redirect to the home page or another page if GET
 
+def home(request):
+    print("Home view has been triggered!")
+    handpicked_game_ids = [10399]
+    trending_games = Game.objects.filter(id__in=handpicked_game_ids)
+    print(f"Trending games: {trending_games}")
+    context = {
+        'trending_games': trending_games,  # Pass handpicked games to template
+    }
+
+    return render(request, 'home.html', context)
+
+from django.shortcuts import render
+from django.http import HttpResponse
+
+def test_view(request):
+    return HttpResponse("This is a test page.")
+
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -57,23 +74,6 @@ def sign_up(request):
     else:
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
-
-def home(request):
-    total_games = Game.objects.count()
-    avg_rating = Game.objects.aggregate(Avg('rating'))['rating__avg']
-    top_genres = Game.objects.values('genre').annotate(count=Count('id')).order_by('-count')[:5]
-    recent_games = Game.objects.order_by('-release_date')[:10]
-    
-    context = {
-        'total_games': total_games,
-        'avg_rating': avg_rating,
-        'top_genres': top_genres,
-        'recent_games': recent_games,
-    }
-
-from django.core.paginator import Paginator, EmptyPage
-from django.shortcuts import render
-import logging
 
 logger = logging.getLogger(__name__)
 

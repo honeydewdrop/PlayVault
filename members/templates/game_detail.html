@@ -5,9 +5,9 @@
     body {
     margin: 20;
     min-height: 60vh; /* Ensure the body covers the viewport */
-    background-color: #000000; /* Solid black background */
+    background-color: #1c1a1a; /* Solid black background */
     background-image: 
-        linear-gradient(to bottom, transparent 40%, #000000 50%), 
+        linear-gradient(to bottom, transparent 40%, #1c1a1a 50%), 
         url("{{ header_image }}");
     background-size: cover, cover;
     background-position: center, center;
@@ -28,7 +28,7 @@
         flex: 2; /* Occupy more space */
         display: flex;
         flex-direction: column;
-        margin-top: 165px;
+        margin-top: 120px;
         flex-wrap: wrap;
         gap: 20px;
         font-size: 100%;
@@ -37,7 +37,7 @@
     }
 
     .sidebar {
-        margin-top: 320px;
+        margin-top: 200px;
         margin-right: 70px;
         flex: 1; /* Occupy less space */
         display: flex;
@@ -53,11 +53,20 @@
     }   
 
     .card {
-        background: rgba(0, 0, 0, 0.5);
+        background: #1c1a1a;
         border-radius: 8px;
         padding: 4px;
+        padding-bottom: 16px;
         color: white;
     }
+
+    .card2 {
+        background: #1c1a1a;
+        border-radius: 8px;
+        color: white;
+        margin-left: 650px;
+    }
+
     
     #rating {
     margin-top: -20px;  /* Adjust the margin to move it up */
@@ -85,14 +94,12 @@
             <p class="text-white"><strong>Genre:</strong> {{ game.genre }}</p>
             <p class="text-white"><strong>Platforms:</strong> {{ game.platforms }}</p>
         </div>
-        <div class="card">
-            <h2 class="text-xl mb-2">User Reviews</h2>
-            <div id="reviews-container">
+        <div class="card2">
+            <h2 class="text-xl mb-2 ml-60">User Reviews</h2>
+            <div id="text-wrapper" class ="text-wrapper">
                 {% if reviews %}
                     {% for review in reviews %}
-                        <div class="border-b mb-2 pb-2">
-                            <p><strong>{{ review.user.username }}:</strong> {{ review.reviewtext }} (Rating: {{ review.rating }})</p>
-                        </div>
+                            <p><strong>{{ review.user.username }}:</strong> {{ review.reviewtext }} {{ review.rating }}</p>
                     {% endfor %}
                 {% else %}
                     <p>No reviews yet.</p>
@@ -115,11 +122,11 @@
                 <select id="rating" name="rating" class="border rounded w-full p-2" required 
         style="margin-top: 0px; margin-right: 6px; position: absolute;">
     <option value="" disabled selected>Select a rating</option>
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-    <option value="5">5</option>
+    <option value="1">★</option>
+    <option value="2">★★</option>
+    <option value="3">★★★</option>
+    <option value="4">★★★★</option>
+    <option value="5">★★★★★</option>
 </select>
                 
                 <input type="hidden" name="game_id" value="{{ game.id }}">
