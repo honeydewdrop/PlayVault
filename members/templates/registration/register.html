@@ -1,12 +1,27 @@
 {% include 'navbar.html' %}
 
 {% block content %}
-
+<style>
+    body {
+        background-color: #1c1a1a;
+        color: white;
+        }
+    .container {
+        margin-top: 150px;
+        margin-left: 500px;
+        background-color: #1c1a1a;
+        width: 500px;
+        height: 500px;
+		
+    }
+</style>
+<div class="container">
 <form method="POST" novalidate>
 	{% csrf_token %}
 	<h2>Sign Up</h2>
 	{{ form.as_p }}		
 	<input type="submit" value="Register" />
 </form>
+</div>
 
 {% endblock content %}

@@ -1,52 +1,120 @@
-{% extends "navbar.html" %}
+{% include "navbar.html" %}
+{% load static %}
 
-{% block content %}
 <style>
     body {
-        background: #1c1a1a;
+        background-color: #1c1a1a;
+    }
+
+    .dots {
+        margin: 0 5px; /* Adds horizontal space between the dots and the page numbers */
+        font-size: 20px; /* Optional: adjust the size of the dots */
+    }
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr); /* Create 12 columns */
+        gap: 10px; /* Space between images */
+        margin: 20px; /* Add some margin around the grid */
+    }
+
+    .result-item {
+        position: relative; /* For future customization, if needed */
+        width: 100px;
+        height: 170px;
+    }
+
+    .result-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s; /* Smooth transition for opacity */
+    }
+    .result-item .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Gray transparent overlay */
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0; /* Hidden by default */
+        transition: opacity 0.3s; /* Smooth fade-in */
+        text-align: center; /* Center text */
+    }
+
+    .result-item:hover img {
+        opacity: 0.5; /* Make the cover semi-transparent */
+    }
+
+    .result-item:hover .overlay {
+        opacity: 1; /* Show the overlay on hover */
     }
 </style>
-    <h1>Search Results for "{{ query }}"</h1>
-    
-    {% if page_obj %}
-        <p>Found {{ total_results }} results</p>
-        <ul>
-            {% for game in page_obj %}
-                <li>
-                    <h2>
-                        <a href="{% url 'game_detail' game.id %}">{{ game.name }}</a>
-                    </h2>
-                    {% if game.cover_url %}
-                        <img src="{{ game.cover_url }}" alt="{{ game.name }}">
-                    {% else %}
-                        <p>No image available</p>
-                    {% endif %}
-                </li>
-            {% empty %}
-                <li>No games in this page (this shouldn't happen if total_results > 0)</li>
-            {% endfor %}
-        </ul>
 
-        {% if page_obj.has_other_pages %}
-            <div class="pagination">
+{% block content %}
+<h1 class="text-white text-center pt-24">Search Results for "{{ query }}"</h1>
+<div class="results-grid">
+    {% if page_obj.object_list %}
+        {% for game in page_obj %}
+            {% if game.cover_url %}
+        <div class="result-item">
+            <a href="{% url 'game_detail' game.id %}">
+            <img src="{{ game.cover_url }}" alt="{{ game.name }} Cover Image">
+            <div class="overlay">
+                <p>{{ game.name }}</p>
+            </div>
+            </a>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% else %}
+    <p>No games available.</p>
+{% endif %}
+
+{% if page_obj.has_other_pages %}
+            <div class="pagination" style="justify-content: center; align-items: center; gap: 10px; color:white; font-size: 24px; padding-top: 5px">
+                <!-- "First" and "Previous" buttons -->
                 {% if page_obj.has_previous %}
-                    <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}">&laquo; Previous</a>
+                    <a href="?page=1">&laquo; First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
                 {% endif %}
-
+        
+                <!-- Pages Logic: Show 1, current page, last page, and nearby pages -->
                 {% for i in page_obj.paginator.page_range %}
-                    {% if page_obj.number == i %}
-                        <span class="current-page">{{ i }}</span>
-                    {% else %}
-                        <a href="?q={{ query }}&page={{ i }}">{{ i }}</a>
+                    {% if i == 1 or i == page_obj.paginator.num_pages %}
+                        <!-- Show first and last page -->
+                        {% if page_obj.number == i %}
+                            <span class="current">{{ i }}</span> <!-- Current page, no link -->
+                        {% else %}
+                            <a href="?page={{ i }}">{{ i }}</a> <!-- Other pages, linkable -->
+                        {% endif %}
+                    {% elif i >= page_obj.number|add:-2 and i <= page_obj.number|add:2 %}
+                        <!-- Show current page range -->
+                        {% if page_obj.number == i %}
+                            <span class="current">{{ i }}</span> <!-- Current page -->
+                        {% else %}
+                            <a href="?page={{ i }}">{{ i }}</a> <!-- Other pages -->
+                        {% endif %}
+                    {% elif i == page_obj.number|add:-3 or i == page_obj.number|add:3 %}
+                        <span class="dots"> ... </span> <!-- Ellipsis when skipping pages -->
                     {% endif %}
                 {% endfor %}
-
+        
+                <!-- "Next" and "Last" buttons -->
                 {% if page_obj.has_next %}
-                    <a href="?q={{ query }}&page={{ page_obj.next_page_number }}">Next &raquo;</a>
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
                 {% endif %}
             </div>
         {% endif %}
-    {% else %}
-        <p>No games found matching your query.</p>
-    {% endif %}
-{% endblock %}
+        
+        {% endblock %}
+        
+        <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+        
+    </div>

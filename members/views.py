@@ -155,52 +155,42 @@ async def fetch_all_igdb_games_sync(total_games=500):
     """ Helper function to run the async function in a sync context. """
     return await fetch_all_igdb_games(total_games)
 
+from django.core.paginator import Paginator, EmptyPage
+
 def search_games(request):
     query = request.GET.get('q', '').strip().lower()
     print(f"Search query: '{query}'")
 
     try:
         # Get all games from the database
-        
-        all_games = Game.objects.all()
+        queryset = Game.objects.all()
 
-      
         # Filter games based on the query
         if query:
-            results = [game for game in all_games if query in game.name.lower()]
-        else:
-            results = list(all_games)
+            queryset = queryset.exclude(cover_url__isnull=True).exclude(cover_url='')
+            queryset = queryset.filter(name__icontains=query)
 
-        print(f"Total number of games: {len(results)}")
+        print(f"Total number of games matching query: {queryset.count()}")
 
         # Set up pagination
-        games_per_page = 20
-        paginator = Paginator(results, games_per_page)
-        total_pages = paginator.num_pages
+        games_per_page = 48
+        paginator = Paginator(queryset, games_per_page)
+        page_number = request.GET.get("page")
 
-        # Iterate through all pages
-        all_games_count = 0
-        for page_number in range(1, total_pages + 1):
-            page = paginator.page(page_number)
-            for game in page:
-                all_games_count += 1
-                # Here you can process each game as needed
-                # For example, print every 10000th game:
-                if all_games_count % 10000 == 0:
-                    print(f"Processing game {all_games_count}: {game.name}")
+        try:
+            # Get the page object based on the page number from the URL
+            page_obj = paginator.get_page(page_number)
+        except EmptyPage:
+            # If the page number is invalid, load the last page
+            page_obj = paginator.get_page(paginator.num_pages)
 
-        print(f"Total games processed: {all_games_count}")
-
-        # For the actual view rendering, we'll use the requested page
-        page_number = request.GET.get('page', 1)
-        page_obj = paginator.get_page(page_number)
-
+        # Context for the template
         context = {
             'page_obj': page_obj,
             'query': query,
-            'total_results': len(results),
-            'total_games_processed': all_games_count,
+            'total_results': queryset.count(),
         }
+
         return render(request, 'search_results.html', context)
 
     except Exception as e:
@@ -209,7 +199,8 @@ def search_games(request):
             'error': str(e),
             'query': query,
         }
-        return render(request, 'members/search_results.html', context)
+        return render(request, 'search_results.html', context)
+
 
 def game_detail(request, game_id):
     game = get_object_or_404(Game, id=game_id)
@@ -240,6 +231,20 @@ def platform_games(request, platform):
     page_obj = paginator.get_page(page_number)
     return render(request, 'members/platform_games.html', {'page_obj': page_obj, 'platform': platform})
 
+def get_all_reviews(request, game_id):
+    if request.method == "GET":
+        reviews = ReviewsFixed.objects.filter(game_id=game_id).select_related('user')  # Adjust based on your model
+        reviews_data = [
+            {
+                "username": review.user.username,
+                "reviewtext": review.reviewtext,
+                "rating": review.rating,
+            }
+            for review in reviews
+        ]
+        return JsonResponse({"reviews": reviews_data})
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
 @login_required
 def submit_review(request):
        if request.method == 'POST':
@@ -259,7 +264,7 @@ def submit_review(request):
                    })
                except Exception as e:
                    print("Error saving review:", e)  # Print any errors that occur
-                   return JsonResponse({'error': 'Error saving review'}, status=500)
+                   return JsonResponse({'error': 'Error saving review. Must be logged in.'}, status=500)
            else:
                print("Form errors:", form.errors)  # Print form errors for debugging
                return JsonResponse({'error': 'Invalid form submission', 'details': form.errors}, status=400)
@@ -270,16 +275,31 @@ def progress_view(request):
     if request.method == 'POST':
         form = StatusForm(request.POST)
         if form.is_valid():
-            game_status = form.save(commit=False)
-            game_status.user = request.user  # Set the current user
-            game_status.game = get_object_or_404(Game, id=request.POST.get('game_id'))
-            game_status.save()
+            # Get the game object
+            game = get_object_or_404(Game, id=request.POST.get('game_id'))
+
+            # Try to get the existing status for this user and game
+            game_status, created = GameStatus.objects.get_or_create(user=request.user, game=game)
+
+            # If the status already exists, update it
+            if not created:
+                game_status.status = form.cleaned_data['status']
+                game_status.save()
+
+            # If the status was newly created, set the user and game
+            else:
+                game_status.user = request.user
+                game_status.game = game
+                game_status.status = form.cleaned_data['status']
+                game_status.save()
+
             return JsonResponse({
                 'status': game_status.status,  # Return the selected status
-                'message': 'Status updated successfully',
+                'message': 'Status updated successfully' if not created else 'Status created successfully',
             })
         else:
-            return JsonResponse({'error': 'Invalid form submission', 'details': form.errors}, status=400)
+            return JsonResponse({'error': 'Invalid form data', 'details': form.errors}, status=400)
+
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 @login_required

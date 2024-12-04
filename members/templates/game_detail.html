@@ -5,12 +5,13 @@
     body {
     margin: 20;
     min-height: 60vh; /* Ensure the body covers the viewport */
-    background-color: #1c1a1a; /* Solid black background */
+    background: #1c1a1a;
     background-image: 
         linear-gradient(to bottom, transparent 40%, #1c1a1a 50%), 
         url("{{ header_image }}");
     background-size: cover, cover;
     background-position: center, center;
+    background-repeat: no-repeat;
     }
 
 
@@ -33,7 +34,8 @@
         gap: 20px;
         font-size: 100%;
         transform: none;
-        line-height: normal
+        line-height: normal;
+        position: relative;
     }
 
     .sidebar {
@@ -50,6 +52,7 @@
     max-width: 800px; /* Adjust as needed */
     word-wrap: break-word;
     white-space: normal;
+    max-height: 200px;
     }   
 
     .card {
@@ -60,18 +63,34 @@
         color: white;
     }
 
-    .card2 {
-        background: #1c1a1a;
-        border-radius: 8px;
-        color: white;
-        margin-left: 650px;
-    }
+    #reviews-container {
+    max-height: 200px; /* Set a fixed height for the container */
+    max-width: 100%;
+    width: 100%;
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding-right: 10px; /* Add padding for better readability */
+    scrollbar-width: thin; /* For modern browsers */
+    scrollbar-color: #888 #444; /* Custom scrollbar colors */
+    color: white;
+    position: absolute;
+    margin-left: 270px;
+}
+
+    .clamp-text {
+    display: -webkit-box; /* Required for webkit browsers */
+    -webkit-line-clamp: 8; /* Number of lines to show */
+    -webkit-box-orient: vertical; /* Required for line clamping */
+    overflow: hidden; /* Hides the overflowing text */
+    text-overflow: bracket, ellipsis bracket; /* Adds "..." at the end of the truncated text */
+    white-space: normal; /* Ensures wrapping for multiline */
+}
 
     
     #rating {
     margin-top: -20px;  /* Adjust the margin to move it up */
     margin-left: auto;  /* Move it to the right */
     margin-right: 20px; /* You can adjust this for more control */
+    max-width: 300px;
 }
 
 
@@ -88,25 +107,21 @@
         <div>
             <p style="font-size: 3rem; color: white">{{ game.name }}</p>
             <p class="sub-title text-white">Released on {{ game.release_date }}</p>
-            <p class="text-white text-wrapper">{{ game.description }}</p>
-        </div>
-        <div>
+            <p class="text-white text-wrapper clamp-text">{{ game.description }}</p>
             <p class="text-white"><strong>Genre:</strong> {{ game.genre }}</p>
             <p class="text-white"><strong>Platforms:</strong> {{ game.platforms }}</p>
         </div>
-        <div class="card2">
-            <h2 class="text-xl mb-2 ml-60">User Reviews</h2>
-            <div id="text-wrapper" class ="text-wrapper">
-                {% if reviews %}
-                    {% for review in reviews %}
-                            <p><strong>{{ review.user.username }}:</strong> {{ review.reviewtext }} {{ review.rating }}</p>
-                    {% endfor %}
-                {% else %}
-                    <p>No reviews yet.</p>
-                {% endif %}
+        <div class="reviews-container">
+            <h2 class="text-xl mb-2 text-white" style="margin-left: 650px;">User Reviews</h2>
+            <div id="reviews-container" class="text-wrapper">
+                {% for review in reviews %}
+                    <p><strong>{{ review.user.username }}:</strong> ({{ review.rating }}/5)  {{ review.reviewtext }} </p>
+                {% endfor %}
             </div>
-            <a href="/games/{{ game.id }}/reviews/" class="text-blue-500">See all reviews</a>
-        </div>
+            {% if reviews|length > 5 %}
+                <button id="show-more-reviews" class="text-blue-500 mt-4">Show More Reviews</button>
+            {% endif %}
+        </div>        
     </div>
 
     <!-- Sidebar for Reviews and Status -->
@@ -120,7 +135,7 @@
                 {% csrf_token %}
                 <textarea id="reviewtext" name="reviewtext" rows="4" class="border rounded w-full p-2" required></textarea>
                 <select id="rating" name="rating" class="border rounded w-full p-2" required 
-        style="margin-top: 0px; margin-right: 6px; position: absolute;">
+        style="margin-top: 0px; margin-right: 6px; margin-bottom: -30px; position: absolute;">
     <option value="" disabled selected>Select a rating</option>
     <option value="1">★</option>
     <option value="2">★★</option>
@@ -130,7 +145,7 @@
 </select>
                 
                 <input type="hidden" name="game_id" value="{{ game.id }}">
-                <button type="submit" class="bg-gray-500 text-black rounded ml-8 px-4 py-2 mt-2">Submit Review</button>
+                <button type="submit" class="bg-gray-500 text-black rounded ml-8 px-4 py-2 mb-28" style="margin-bottom: -40px;">Submit Review</button>
             </form>
         </div>
 
@@ -155,38 +170,73 @@
     </div>
 </div>
 <script>
-    document.getElementById('review-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-    
-            const formData = new FormData(this); // Create a FormData object from the form
-    
-            fetch("{% url 'submit_review' %}", {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest' // Indicate that this is an AJAX request
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json(); // Parse the JSON response
-            })
-            .then(data => {
-                // Append the new review to the reviews container
-                const reviewsContainer = document.getElementById('reviews-container');
-                const newReview = document.createElement('div');
-                newReview.classList.add('border-b', 'mb-2', 'pb-2');
-                newReview.innerHTML = `<p class="text-gray-700"><strong>${data.username}:</strong> ${data.reviewtext} (Rating: ${data.rating})</p>`;
-                reviewsContainer.prepend(newReview); // Add the new review at the top
-                document.getElementById('reviewtext').value = ''; // Clear the textarea
-                document.getElementById('rating').value = ''; // Reset the rating
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
+        document.addEventListener('DOMContentLoaded', function () {
+        const showMoreButton = document.getElementById('show-more-reviews');
+        const reviewsContainer = document.getElementById('reviews-container');
+
+        if (showMoreButton) {
+            showMoreButton.addEventListener('click', function () {
+                fetch("{% url 'get_all_reviews' game.id %}") // Replace with your actual view URL
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Clear current reviews
+                        reviewsContainer.innerHTML = '';
+
+                        // Populate with all reviews
+                        data.reviews.forEach(review => {
+                            const reviewElement = document.createElement('p');
+                            newReview.innerHTML = `<strong>${data.username}:</strong> (${data.rating}/5) ${data.reviewtext}`;
+                            reviewsContainer.appendChild(reviewElement);
+                        });
+
+                        // Remove the "Show More" button
+                        showMoreButton.remove();
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                    });
             });
-        });
+        }
+    });
+    document.getElementById('review-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const formData = new FormData(this); // Create a FormData object from the form
+
+    fetch("{% url 'submit_review' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest' // Indicate that this is an AJAX request
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json(); // Parse the JSON response
+    })
+    .then(data => {
+        // Append the new review to the reviews container
+        const reviewsContainer = document.getElementById('reviews-container');
+        const newReview = document.createElement('p');
+        newReview.innerHTML = `<strong>${data.username}:</strong> (${data.rating}/5) ${data.reviewtext}`;
+        reviewsContainer.prepend(newReview); // Add the new review at the top
+        
+        // Clear the form fields
+        document.getElementById('reviewtext').value = ''; // Clear the textarea
+        document.getElementById('rating').value = ''; // Reset the rating
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    });
+});
+
     
         document.getElementById('status-form').addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent the default form submission

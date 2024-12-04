@@ -11,10 +11,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         response = post(
-            'https://api.igdb.com/v4/companies',
+            'https://api.igdb.com/v4/games',
             headers = {
-        'Client-ID': '5fx0c2tdp25zr3fuazhlqmwvezok4f',
-        'Authorization': 'Bearer 9xs6a5rq9q9i37q84ca5w82uasrwt9',
+            'Client-ID': '5fx0c2tdp25zr3fuazhlqmwvezok4f',
+            'Authorization': 'Bearer 3xxfztzjvay61ucv7m8c4uty8phk1j',
             },
             data='fields change_date,change_date_category,changed_company_id,checksum,country,created_at,description,developed,logo,name,parent,published,slug,start_date,start_date_category,updated_at,url,websites;'
         )
