@@ -77,44 +77,42 @@
 {% endif %}
 
 {% if page_obj.has_other_pages %}
-            <div class="pagination" style="justify-content: center; align-items: center; gap: 10px; color:white; font-size: 24px; padding-top: 5px">
-                <!-- "First" and "Previous" buttons -->
-                {% if page_obj.has_previous %}
-                    <a href="?page=1">&laquo; First</a>
-                    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                {% endif %}
-        
-                <!-- Pages Logic: Show 1, current page, last page, and nearby pages -->
-                {% for i in page_obj.paginator.page_range %}
-                    {% if i == 1 or i == page_obj.paginator.num_pages %}
-                        <!-- Show first and last page -->
-                        {% if page_obj.number == i %}
-                            <span class="current">{{ i }}</span> <!-- Current page, no link -->
-                        {% else %}
-                            <a href="?page={{ i }}">{{ i }}</a> <!-- Other pages, linkable -->
-                        {% endif %}
-                    {% elif i >= page_obj.number|add:-2 and i <= page_obj.number|add:2 %}
-                        <!-- Show current page range -->
-                        {% if page_obj.number == i %}
-                            <span class="current">{{ i }}</span> <!-- Current page -->
-                        {% else %}
-                            <a href="?page={{ i }}">{{ i }}</a> <!-- Other pages -->
-                        {% endif %}
-                    {% elif i == page_obj.number|add:-3 or i == page_obj.number|add:3 %}
-                        <span class="dots"> ... </span> <!-- Ellipsis when skipping pages -->
-                    {% endif %}
-                {% endfor %}
-        
-                <!-- "Next" and "Last" buttons -->
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
-                {% endif %}
-            </div>
+    <div class="pagination" style="justify-content: center; align-items: center; gap: 10px; color:white; font-size: 24px; padding-top: 5px">
+        <!-- "First" and "Previous" buttons -->
+        {% if page_obj.has_previous %}
+            <a href="?q={{ query }}&page=1">&laquo; First</a>
+            <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Previous</a>
         {% endif %}
-        
-        {% endblock %}
-        
-        <p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
-        
+
+        <!-- Pages Logic: Show 1, current page, last page, and nearby pages -->
+        {% for i in page_obj.paginator.page_range %}
+            {% if i == 1 or i == page_obj.paginator.num_pages %}
+                <!-- Show first and last page -->
+                {% if page_obj.number == i %}
+                    <span class="current">{{ i }}</span> <!-- Current page, no link -->
+                {% else %}
+                    <a href="?q={{ query }}&page={{ i }}">{{ i }}</a> <!-- Other pages, linkable -->
+                {% endif %}
+            {% elif i >= page_obj.number|add:-2 and i <= page_obj.number|add:2 %}
+                <!-- Show current page range -->
+                {% if page_obj.number == i %}
+                    <span class="current">{{ i }}</span> <!-- Current page -->
+                {% else %}
+                    <a href="?q={{ query }}&page={{ i }}">{{ i }}</a> <!-- Other pages -->
+                {% endif %}
+            {% elif i == page_obj.number|add:-3 or i == page_obj.number|add:3 %}
+                <span class="dots"> ... </span> <!-- Ellipsis when skipping pages -->
+            {% endif %}
+        {% endfor %}
+
+        <!-- "Next" and "Last" buttons -->
+        {% if page_obj.has_next %}
+            <a href="?query={{ query }}&page={{ page_obj.next_page_number }}">Next</a>
+            <a href="?query={{ query }}&page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+        {% endif %}
     </div>
+{% endif %}
+
+
+<p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+{% endblock %}

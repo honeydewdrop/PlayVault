@@ -187,7 +187,7 @@ def search_games(request):
         # Context for the template
         context = {
             'page_obj': page_obj,
-            'query': query,
+            'query': query,  # Pass the query as 'query'
             'total_results': queryset.count(),
         }
 
@@ -200,6 +200,7 @@ def search_games(request):
             'query': query,
         }
         return render(request, 'search_results.html', context)
+
 
 
 def game_detail(request, game_id):
