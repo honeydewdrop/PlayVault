@@ -16,8 +16,7 @@ class Command(BaseCommand):
             response = post(
                 'https://api.igdb.com/v4/companies',
                 headers={
-                    'Client-ID': '5fx0c2tdp25zr3fuazhlqmwvezok4f',
-                    'Authorization': 'Bearer 5szryh4h5lrms9sc4yqyw2vyedyegu',
+                    # shhhhhhhh!
                 },
                 data=f'fields change_date,change_date_category,changed_company_id,checksum,country,created_at,description,developed,logo,name,parent,published,slug,start_date,start_date_category,updated_at,url,websites; limit {limit}; offset {offset};'
             )
